@@ -1,4 +1,4 @@
-# Assigment 3: smallsh
+# Assignment 3: smallsh
 
 **Due** Feb 7, 2022  |   **Points** 180
 
