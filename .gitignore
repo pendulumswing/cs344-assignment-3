@@ -1,0 +1,11 @@
+*.o
+*.a
+*/build
+*.d
+*.dSYM
+*~
+.vscode
+movies_by_year
+/Submission
+
+brownja4.*
