@@ -9,7 +9,7 @@ CFLAGS = --std=gnu99
 SRCEXT = c
 
 BINDIR = .
-exe_file = movies_by_year
+exe_file = smallsh
 
 # Handle debug case
 DEBUG ?= 1
