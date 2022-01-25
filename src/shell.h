@@ -12,13 +12,18 @@
 #define MAX_ARGS 512
 
 
+
+
 /*
-* Struct to hold details of individual command or argument(s)
+* struct COMMAND
+* To hold details for individual command or argument(s)
 */
 typedef struct command {
 
   char name[MAX_FILE_LENGTH];
-  char args[MAX_ARGS][MAX_FILE_LENGTH];
+  // char args[MAX_ARGS][MAX_FILE_LENGTH];
+  char * args[MAX_ARGS];
+  int numargs;
 
   char finname[MAX_FILE_LENGTH];
   char finpath[MAX_LINE_LENGTH];
@@ -31,11 +36,30 @@ typedef struct command {
   bool isOp;                      // Operator such as '<', '>' or '&'
   char op;                        // Actual char for operator
 
+  void (*free) (struct command *);
+
 } Command;
 
 
 /*
-* Initializes Command struct and clears memory
+* struct COMMANDLINE
+* To hold all commands for a given line
+*/
+typedef struct commandline {
+
+  char input[MAX_LINE_LENGTH];
+  struct command * commands[MAX_ARGS];
+
+} CommandLine;
+
+
+void freeCommand(Command * c);
+
+
+
+
+/*
+* Initializes Command struct
 */
 void initCommand(Command * c)
 {
@@ -43,8 +67,9 @@ void initCommand(Command * c)
 
   for (int i = 0; i < MAX_ARGS; i++)
   {
-    memset(c->args[i], '\0', MAX_FILE_LENGTH * sizeof(char));
+    c->args[i] = NULL;
   }
+  c->numargs = 0;
   
   memset(c->finname, '\0', MAX_FILE_LENGTH * sizeof(char));
   memset(c->finpath, '\0', MAX_LINE_LENGTH * sizeof(char));
@@ -56,19 +81,57 @@ void initCommand(Command * c)
   c->isBg = false;
   c->isOp = false;
   c->op = '\0';
+
+  c->free = &freeCommand;
 }
 
 
 
 /*
-* Struct to hold all commands for a given line
+* Creates command struct and populates fields based on tokens
 */
-typedef struct commandline {
+Command * createCommand(char * input)
+{
+  Command * c = malloc(sizeof(Command));
+  initCommand(c);
 
-  char input[MAX_LINE_LENGTH];
-  struct command * commands[MAX_ARGS];
+  char * saveptr;
 
-} CommandLine;
+  // Get first toke = name
+  char * token = strtok_r(input, " ", &saveptr);
+  strcpy(c->name, token);
+
+  int count = 0;
+  token = strtok_r(NULL, " ", &saveptr);
+  while(token != NULL) {
+    c->args[count] = malloc(strlen(token) + 1 * sizeof(char));
+    strcpy(c->args[count], token);
+    token = strtok_r(NULL, " ", &saveptr);
+    count++;
+  }
+  c->numargs = count;
+
+  return c;
+}
+
+
+
+/*
+* Frees allocated memory for a Command struct
+*/
+void freeCommand(Command * c)
+{
+  for (int i = 0; i < c->numargs; i++)
+  {
+    free(c->args[i]);
+  }
+  free(c);
+  c = NULL;
+}
+
+
+
+
 
 
 /*
@@ -102,6 +165,9 @@ void getInput(char * input, int size)
 }
 
 
+/*
+* Returns true if only characters in string are spaces.
+*/
 bool hasSpacesOnly(const char * input) {
   int i = 0;
   bool spacesOnly = true;
@@ -115,6 +181,41 @@ bool hasSpacesOnly(const char * input) {
   return spacesOnly;
   
 }
+
+
+//-------------------------------------------------
+    // Variable Exapansion of '$$'
+
+
+// void expandVariable$$(char * input, char * replacement)
+// {
+//   int size = strlen(input);
+//   char * temp = malloc(sizeof(char) * (size + 1));
+//   int sizeReplacement = strlen(replacement);
+
+//   for (int i = 0; i < size; i++)
+//   {
+//     if(input[i] == '$' && input[i + 1] == '$') {
+//       // printf("PID: %d\n", stoi(replacement));
+//       printf("PID STR: %s\n", replacement);
+
+//       // strcpy()
+
+
+//     }
+//   }
+
+//   free(temp);
+
+//   // 1. Allocate memory for new string
+//   // 2. strcat last half of input string to new string
+//   // 3. convert PID to string
+//   // 4. Add PID as string to input at i with strcat
+//   // 5. Add remainder of string with strcat
+//   // 6. Free memory for temporary string
+//   //-------------------------------------------------
+
+// }
 
 
 
