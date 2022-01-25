@@ -30,6 +30,10 @@ int main(int argc, char *argv[])
   srandom(time(0));
 
   char input[MAX_LINE_LENGTH];
+  CommandLine cl;
+  // initCommandLine(&cl);
+
+
 
   do
   {

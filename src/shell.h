@@ -17,6 +17,7 @@
 */
 typedef struct command {
 
+  char name[MAX_FILE_LENGTH];
   char args[MAX_ARGS][MAX_FILE_LENGTH];
 
   char finname[MAX_FILE_LENGTH];
@@ -33,6 +34,31 @@ typedef struct command {
 } Command;
 
 
+/*
+* Initializes Command struct and clears memory
+*/
+void initCommand(Command * c)
+{
+  memset(c->name, '\0', MAX_FILE_LENGTH * sizeof(char));
+
+  for (int i = 0; i < MAX_ARGS; i++)
+  {
+    memset(c->args[i], '\0', MAX_FILE_LENGTH * sizeof(char));
+  }
+  
+  memset(c->finname, '\0', MAX_FILE_LENGTH * sizeof(char));
+  memset(c->finpath, '\0', MAX_LINE_LENGTH * sizeof(char));
+  memset(c->foutname, '\0', MAX_FILE_LENGTH * sizeof(char));
+  memset(c->foutpath, '\0', MAX_LINE_LENGTH * sizeof(char));
+  c->fsin = NULL;
+  c->fsout = NULL;
+
+  c->isBg = false;
+  c->isOp = false;
+  c->op = '\0';
+}
+
+
 
 /*
 * Struct to hold all commands for a given line
@@ -40,11 +66,19 @@ typedef struct command {
 typedef struct commandline {
 
   char input[MAX_LINE_LENGTH];
-  struct command commands[MAX_ARGS];
+  struct command * commands[MAX_ARGS];
 
 } CommandLine;
 
 
+/*
+* Initializes CommandLine struct and clears memory
+*/
+void initCommandLine(CommandLine * cl)
+{
+  memset(cl->input, '\0', MAX_LINE_LENGTH * sizeof(char));
+  // memset(cl->commands, '\0', MAX_ARGS * sizeof(Command));
+}
 
 
 /*
