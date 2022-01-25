@@ -189,18 +189,23 @@ bool hasSpacesOnly(const char * input) {
 //-------------------------------------------------
     // Variable Exapansion of '$$'
 
-void expandVariable(char * input)
+void expandVariable(char * in)
 {
+  char * input = malloc(sizeof(char) * strlen(in));
+  strcpy(input, in);
 
   char* replacement = getenv("PID");
 
   int sizeInput = strlen(input);
   int sizeReplacement = strlen(replacement);
 
+  bool flag = false;
 
   for (int i = 0; i < sizeInput; i++)
   {
     if(input[i] == '$' && input[i + 1] == '$') {
+
+      flag = true;
 
       char * beg = substring(input, 0, i);
       char * end = substring(input, i+2, sizeInput - i);
@@ -215,14 +220,16 @@ void expandVariable(char * input)
 
       free(beg);
       free(end);
-      // free(input);
 
       // printf("PID: %d\n", stoi(replacement));
       printf("EXAPNDED INPUT: %s\n", output);
       // strcpy(input, output);
+      free(input);
       input = output;
+
+      output = NULL;
       sizeInput = strlen(input);
-      free(output);
+      // free(output);
     }
   }
   // return input;
