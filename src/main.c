@@ -37,6 +37,7 @@ int main(int argc, char *argv[])
   int pid = getpid();
   char pidstr[12];
   sprintf(pidstr, "%d", pid);  // Convert pid to string
+  setenv("PID", pidstr, 1);
 
 
 
@@ -49,6 +50,12 @@ int main(int argc, char *argv[])
     getInput(input, MAX_LINE_LENGTH);
     inputlen = strlen(input);
     printf("You entered: %s\n", input);
+
+    char * temp = "test$$this$$string";
+    // strcpy(temp, input);
+    printf("TEMP: %s\n", temp);
+
+    expandVariable(temp);
 
     // Command * command;
     // initCommand(&command);
@@ -63,7 +70,6 @@ int main(int argc, char *argv[])
 
     // freeCommand(command);
     command->free(command);
-
 
     // //-------------------------------------------------
     // // Variable Exapansion of '$$'
@@ -87,7 +93,6 @@ int main(int argc, char *argv[])
     if(input[0] == '#' || inputlen == 0 || hasSpacesOnly(input)) {
       printf("# Comment or Blank line or Spaces only\n");
     }
-
 
     // printf("Enter a number 1 or 2: ");
     

@@ -54,6 +54,8 @@ typedef struct commandline {
 
 
 void freeCommand(Command * c);
+char * substring(char * str, int pos, int len);
+void expandVariable(char * input);
 
 
 
@@ -99,6 +101,7 @@ Command * createCommand(char * input)
 
   // Get first toke = name
   char * token = strtok_r(input, " ", &saveptr);
+  // strcpy(c->name, expandVariable(token));
   strcpy(c->name, token);
 
   int count = 0;
@@ -185,6 +188,82 @@ bool hasSpacesOnly(const char * input) {
 
 //-------------------------------------------------
     // Variable Exapansion of '$$'
+
+void expandVariable(char * input)
+{
+
+  char* replacement = getenv("PID");
+
+  int sizeInput = strlen(input);
+  int sizeReplacement = strlen(replacement);
+
+
+  for (int i = 0; i < sizeInput; i++)
+  {
+    if(input[i] == '$' && input[i + 1] == '$') {
+
+      char * beg = substring(input, 0, i);
+      char * end = substring(input, i+2, sizeInput - i);
+      printf("BEG: %s, PID: %s, END: %s\n", beg, replacement, end);
+
+      char * output = malloc(sizeof(char) * (sizeInput + 1 + sizeReplacement));
+      memset(output, '\0', (sizeof(char) * (sizeInput + 1 + sizeReplacement)));
+
+      strcat(output, beg);
+      strcat(output, replacement);
+      strcat(output, end);
+
+      free(beg);
+      free(end);
+      // free(input);
+
+      // printf("PID: %d\n", stoi(replacement));
+      printf("EXAPNDED INPUT: %s\n", output);
+      // strcpy(input, output);
+      input = output;
+      sizeInput = strlen(input);
+      free(output);
+    }
+  }
+  // return input;
+  // 1. Allocate memory for new string
+  // 2. strcat last half of input string to new string
+  // 3. convert PID to string
+  // 4. Add PID as string to input at i with strcat
+  // 5. Add remainder of string with strcat
+  // 6. Free memory for temporary string
+  //-------------------------------------------------
+
+}
+
+
+
+
+
+
+/*
+* Creates a new substring from a given string starting at position pos of len chars
+* SOURCE: https://bit.ly/3IAdLPF, Date: 1/25/22, Adopted
+*/
+char * substring(char * str, int pos, int len)
+{
+  char * substring;
+  int i;
+
+  substring = malloc(sizeof(char) * (len + 1));
+  memset(substring, '\0', (len + 1) * sizeof(char));
+
+  if(substring == NULL) {
+    exit(EXIT_FAILURE);
+  }
+
+  for ( i = 0; i < len; i++)
+  {
+    *(substring + i) = *((str + pos) + i);
+  }
+
+  return substring;
+}
 
 
 // void expandVariable$$(char * input, char * replacement)
