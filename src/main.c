@@ -29,38 +29,50 @@ int main(int argc, char *argv[])
   int choice = 1;
   srandom(time(0));
 
+  char input[MAX_LINE_LENGTH];
+
   do
   {
     // Provide menu of choices to user
     shellPrompt();
+
+    getInput(input, MAX_LINE_LENGTH);
+
+
+    printf("You entered: %s\n\n", input);
+
+    // printf("Enter a number 1 or 2: ");
     
-    // Get user choice
-    scanf("%d%*c", &choice);   // Skip newline SOURCE: https://bit.ly/3A9rbPD, Date: 1/18/22, Adopted
+  //   // Get user choice
+  //   scanf("%d%*c", &choice);   // Skip newline SOURCE: https://bit.ly/3A9rbPD, Date: 1/18/22, Adopted
 
-    // Process choice
-    switch (choice)
-    {
-      // 1. Select file to process
-      case 1:
-        {
-          printf("You entered 1.\n\n");
-        }
-        break;
+
+
+  //   // Process choice
+  //   switch (choice)
+  //   {
+  //     // 1. Select file to process
+  //     case 1:
+  //       {
+  //         printf("You entered 1.\n\n");
+  //       }
+  //       break;
 
       
-      // 2. Exit from the program
-      case 2:
-        break;
+  //     // 2. Exit from the program
+  //     case 2:
+  //       break;
       
-      // Handle incorrect choice
-      default:
-        {
-          printf("You entered an incorrect choice. Try again.\n\n");
-        }
-        break;
-    }
+  //     // Handle incorrect choice
+  //     default:
+  //       {
+  //         printf("You entered an incorrect choice. Try again.\n\n");
+  //       }
+  //       break;
+  //   }
 
-  } while (choice != 2);
+  // // } while (choice != 2);
+  } while (strcmp(input, "2") != 0);
 
   return EXIT_SUCCESS;
 }

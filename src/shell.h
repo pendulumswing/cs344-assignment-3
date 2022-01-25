@@ -56,6 +56,16 @@ void shellPrompt() {
 }
 
 
+/*
+* Takes a char array and size as input, Sets content to all '\0',
+* gets user input using fgets, and strips the newline character from the array.
+*/
+void getInput(char * input, int size)
+{
+  memset(input, '\0', size * sizeof(char));
+  fgets(input, size, stdin);
+  input[strcspn(input, "\n")] = '\0';  // Remove newline SOURCE: https://bit.ly/3fyCbwz, Date 1/18/22, Adopted
+}
 
 
 
