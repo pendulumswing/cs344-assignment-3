@@ -102,6 +102,20 @@ void getInput(char * input, int size)
 }
 
 
+bool hasSpacesOnly(const char * input) {
+  int i = 0;
+  bool spacesOnly = true;
+  while (input[i] != '\0')
+  {
+    if(input[i] != ' ') {
+      spacesOnly = false;
+    }
+    i++;
+  }
+  return spacesOnly;
+  
+}
+
 
 
 #endif

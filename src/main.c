@@ -26,34 +26,37 @@
 */
 int main(int argc, char *argv[])
 {
-  // int choice = 1;
-  srandom(time(0));
 
   char input[MAX_LINE_LENGTH];
-  CommandLine cl;
-  // initCommandLine(&cl);
+  int inputlen = 0;
+  // CommandLine cl;
+
+  // Get smallsh PID, as int and string
+  int pid = getpid();
+  char pidstr[12];
+  sprintf(pidstr, "%d", pid);  // Convert pid to string
 
 
 
   do
   {
+    // Prompt for shell
     shellPrompt();
 
+    // Get user command string
     getInput(input, MAX_LINE_LENGTH);
-
-
-    printf("You entered: %s\n\n", input);
+    inputlen = strlen(input);
+    printf("You entered: %s\n", input);
 
 
     //-------------------------------------------------
     // Variable Exapansion of '$$'
-    int length = strlen(input);
-    int pid = 0;
-    for (int i = 0; i < length; i++)
+
+    for (int i = 0; i < inputlen; i++)
     {
       if(input[i] == '$' && input[i + 1] == '$') {
-        pid = getpid();
-        printf("PID: %d\\n", pid);
+        printf("PID: %d\n", pid);
+        printf("PID STR: %s\n", pidstr);
       }
     }
 
@@ -65,6 +68,9 @@ int main(int argc, char *argv[])
     // 6. Free memory for temporary string
     //-------------------------------------------------
 
+    if(input[0] == '#' || inputlen == 0 || hasSpacesOnly(input)) {
+      printf("# Comment or Blank line or Spaces only\n");
+    }
 
 
     // printf("Enter a number 1 or 2: ");
@@ -99,6 +105,10 @@ int main(int argc, char *argv[])
 
   // // } while (choice != 2);
   } while (strcmp(input, "exit") != 0);
+
+  // Exit Command
+  
+
 
   return EXIT_SUCCESS;
 }
