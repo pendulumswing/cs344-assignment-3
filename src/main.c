@@ -26,7 +26,7 @@
 */
 int main(int argc, char *argv[])
 {
-  int choice = 1;
+  // int choice = 1;
   srandom(time(0));
 
   char input[MAX_LINE_LENGTH];
@@ -37,13 +37,35 @@ int main(int argc, char *argv[])
 
   do
   {
-    // Provide menu of choices to user
     shellPrompt();
 
     getInput(input, MAX_LINE_LENGTH);
 
 
     printf("You entered: %s\n\n", input);
+
+
+    //-------------------------------------------------
+    // Variable Exapansion of '$$'
+    int length = strlen(input);
+    int pid = 0;
+    for (int i = 0; i < length; i++)
+    {
+      if(input[i] == '$' && input[i + 1] == '$') {
+        pid = getpid();
+        printf("PID: %d\\n", pid);
+      }
+    }
+
+    // 1. Allocate memory for new string
+    // 2. strcat last half of input string to new string
+    // 3. convert PID to string
+    // 4. Add PID as string to input at i with strcat
+    // 5. Add remainder of string with strcat
+    // 6. Free memory for temporary string
+    //-------------------------------------------------
+
+
 
     // printf("Enter a number 1 or 2: ");
     
@@ -76,7 +98,7 @@ int main(int argc, char *argv[])
   //   }
 
   // // } while (choice != 2);
-  } while (strcmp(input, "2") != 0);
+  } while (strcmp(input, "exit") != 0);
 
   return EXIT_SUCCESS;
 }
