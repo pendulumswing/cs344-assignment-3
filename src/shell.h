@@ -201,17 +201,22 @@ void expandVariable(char * in)
 
   bool flag = false;
 
+
+  char * beg = NULL;
+  char * end = NULL;
+  char * output = NULL;
+
   for (int i = 0; i < sizeInput; i++)
   {
     if(input[i] == '$' && input[i + 1] == '$') {
 
       flag = true;
 
-      char * beg = substring(input, 0, i);
-      char * end = substring(input, i+2, sizeInput - i);
+      beg = substring(input, 0, i);
+      end = substring(input, i+2, sizeInput - i);
       printf("BEG: %s, PID: %s, END: %s\n", beg, replacement, end);
 
-      char * output = malloc(sizeof(char) * (sizeInput + 1 + sizeReplacement));
+      output = malloc(sizeof(char) * (sizeInput + 1 + sizeReplacement));
       memset(output, '\0', (sizeof(char) * (sizeInput + 1 + sizeReplacement)));
 
       strcat(output, beg);
@@ -221,17 +226,16 @@ void expandVariable(char * in)
       free(beg);
       free(end);
 
-      // printf("PID: %d\n", stoi(replacement));
       printf("EXAPNDED INPUT: %s\n", output);
-      // strcpy(input, output);
       free(input);
       input = output;
 
       output = NULL;
       sizeInput = strlen(input);
-      // free(output);
     }
   }
+
+  free(input);
   // return input;
   // 1. Allocate memory for new string
   // 2. strcat last half of input string to new string
