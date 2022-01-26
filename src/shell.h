@@ -60,6 +60,7 @@ void freeCommand(Command * c);
 void printCommand(Command * c);
 char * substring(char * str, int pos, int len);
 char * expandVariable(char * input);
+void trimLeadingWhitespace(char * input);
 
 
 
@@ -105,7 +106,7 @@ Command * createCommand(char * input)
   char * saveptr;
 
   // TODO: Remove leading whitespace
-
+  
 
   // Get first toke = name
   char * token = strtok_r(input, " ", &saveptr);
@@ -129,7 +130,7 @@ Command * createCommand(char * input)
   }
 
   // Background Process?
-  if(strcmp(c->args[c->numargs - 1], "&") == 0) {
+  if(c->numargs > 0 && strcmp(c->args[c->numargs - 1], "&") == 0) {
     c->isBg = true;
   }
 
@@ -295,6 +296,28 @@ char * substring(char * str, int pos, int len)
   }
 
   return substring;
+}
+
+
+
+// Check for leading whitespace and trim if necessary
+void trimLeadingWhitespace(char * input)
+{
+  if(input[0] == ' ') {
+    printf("before: %s\n", input);
+    int i = 0;
+
+    while (input[i] == ' ')
+    {
+      i++;
+    }
+
+    char * temp = substring(input, i, strlen(input) - i);
+    memset(input, '\0', (MAX_LINE_LENGTH) * sizeof(char));
+    strcat(input, temp);
+    free(temp);      
+    printf("after: %s\n", input);
+  }
 }
 
 

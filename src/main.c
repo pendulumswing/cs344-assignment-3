@@ -50,6 +50,9 @@ int main(int argc, char *argv[])
     getInput(input, MAX_LINE_LENGTH);
     inputlen = strlen(input);
 
+    // Check for leading whitespace and trim if necessary
+    trimLeadingWhitespace(*&input);
+
 
     // 2. Handle Comments & Blank Lines
     if(input[0] == '#' || inputlen == 0 || hasSpacesOnly(input)) {
