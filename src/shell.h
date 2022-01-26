@@ -37,6 +37,7 @@ typedef struct command {
   char op;                        // Actual char for operator
 
   void (*free) (struct command *);
+  void (*print) (struct command *);
 
 } Command;
 
@@ -53,7 +54,10 @@ typedef struct commandline {
 } CommandLine;
 
 
+
+
 void freeCommand(Command * c);
+void printCommand(Command * c);
 char * substring(char * str, int pos, int len);
 char * expandVariable(char * input);
 
@@ -85,6 +89,7 @@ void initCommand(Command * c)
   c->op = '\0';
 
   c->free = &freeCommand;
+  c->print = &printCommand;
 }
 
 
@@ -139,7 +144,18 @@ void freeCommand(Command * c)
 }
 
 
-
+void printCommand(Command * c)
+{
+  printf("  CMD: %s\n", c->name);
+  printf("  ARGS: ");
+  fflush(stdout);
+  for (int i = 0; i < c->numargs; i++)
+  {
+    printf("%s ", c->args[i]);
+  }
+  printf("\n");
+  fflush(stdout);
+}
 
 
 
