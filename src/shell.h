@@ -246,8 +246,8 @@ char *expandVariable(char * in)
         char* replacement = getenv("PID");
         int sizeReplacement = strlen(replacement);
 
-        beg = substring(input, 0, i);
-        end = substring(input, i+2, sizeInput - i);
+        beg = substring(input, 0, i+1);
+        end = substring(input, i+2, sizeInput);
         // printf("BEG: %s, PID: %s, END: %s\n", beg, replacement, end);
 
         output = malloc(sizeof(char) * (sizeInput + 1 + sizeReplacement));
