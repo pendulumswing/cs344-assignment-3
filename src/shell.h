@@ -244,24 +244,31 @@ char *expandVariable(char * in)
 
     for (int i = 0; i < sizeInput; i++)
     {
+      printf("[i]: %c, [i + 1]: %c\n", input[i], input[i + 1]);
       if(input[i] == '$' && input[i + 1] == '$') {
 
-        char* replacement = getenv("PID");
+        char * replacement = getenv("PID");
         int sizeReplacement = strlen(replacement);
 
-        beg = substring(input, 0, i);
-        end = substring(input, i+2, sizeInput - 1);
         printf("BEG: %s, PID: %s, END: %s\n", beg, replacement, end);
 
         output = (char *)malloc(sizeof(char) * (sizeInput + 1 + sizeReplacement));
         memset(output, '\0', (sizeof(char) * (sizeInput + 1 + sizeReplacement)));
 
+        beg = substring(input, 0, i);
         strcat(output, beg);
         strcat(output, replacement);
-        strcat(output, end);
 
         free(beg);
-        free(end);
+        beg=NULL;
+
+        if(i < sizeInput - 2) {
+          end = substring(input, i+2, sizeInput - 1);
+          strcat(output, end);
+          free(end);
+          end=NULL;
+        }
+
 
         printf("EXAPNDED INPUT: %s\n", output);
         free(input);
