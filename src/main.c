@@ -49,82 +49,36 @@ int main(int argc, char *argv[])
     // Get user command string
     getInput(input, MAX_LINE_LENGTH);
     inputlen = strlen(input);
-    printf("You entered: %s\n", input);
 
-    char * temp = "test$$this$$string";
-    // strcpy(temp, input);
-    printf("TEMP: %s\n", temp);
 
-    expandVariable(temp);
-
-    // Command * command;
-    // initCommand(&command);
-    Command * command = createCommand(input);
-
-    printf("CMD: %s\n", command->name);
-    for (int i = 0; i < command->numargs; i++)
-    {
-      printf("%s ", command->args[i]);
-    }
-    printf("\n");
-
-    // freeCommand(command);
-    command->free(command);
-
-    // //-------------------------------------------------
-    // // Variable Exapansion of '$$'
-
-    // for (int i = 0; i < inputlen; i++)
-    // {
-    //   if(input[i] == '$' && input[i + 1] == '$') {
-    //     printf("PID: %d\n", pid);
-    //     printf("PID STR: %s\n", pidstr);
-    //   }
-    // }
-
-    // // 1. Allocate memory for new string
-    // // 2. strcat last half of input string to new string
-    // // 3. convert PID to string
-    // // 4. Add PID as string to input at i with strcat
-    // // 5. Add remainder of string with strcat
-    // // 6. Free memory for temporary string
-    // //-------------------------------------------------
-
+    // 2. Handle Comments & Blank Lines
     if(input[0] == '#' || inputlen == 0 || hasSpacesOnly(input)) {
-      printf("# Comment or Blank line or Spaces only\n");
+      printf("IGNORING Comments, blank lines or only spaces\n");
+    } 
+    else 
+    {
+      printf("You entered: %s\n", input);
+
+      TODO:
+      // 1. Generate Command structs while not '<', '>', or '&'
+
+
+
+      Command * command = createCommand(input);
+
+      printf("  CMD: %s\n", command->name);
+      printf("  ARGS: ");
+      fflush(stdout);
+      for (int i = 0; i < command->numargs; i++)
+      {
+        printf("%s ", command->args[i]);
+      }
+      printf("\n");
+      fflush(stdout);
+
+      command->free(command);
+
     }
-
-    // printf("Enter a number 1 or 2: ");
-    
-  //   // Get user choice
-  //   scanf("%d%*c", &choice);   // Skip newline SOURCE: https://bit.ly/3A9rbPD, Date: 1/18/22, Adopted
-
-
-
-  //   // Process choice
-  //   switch (choice)
-  //   {
-  //     // 1. Select file to process
-  //     case 1:
-  //       {
-  //         printf("You entered 1.\n\n");
-  //       }
-  //       break;
-
-      
-  //     // 2. Exit from the program
-  //     case 2:
-  //       break;
-      
-  //     // Handle incorrect choice
-  //     default:
-  //       {
-  //         printf("You entered an incorrect choice. Try again.\n\n");
-  //       }
-  //       break;
-  //   }
-
-  // // } while (choice != 2);
   } while (strcmp(input, "exit") != 0);
 
   // Exit Command

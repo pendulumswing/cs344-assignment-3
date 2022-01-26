@@ -55,7 +55,7 @@ typedef struct commandline {
 
 void freeCommand(Command * c);
 char * substring(char * str, int pos, int len);
-void expandVariable(char * input);
+char * expandVariable(char * input);
 
 
 
@@ -101,18 +101,24 @@ Command * createCommand(char * input)
 
   // Get first toke = name
   char * token = strtok_r(input, " ", &saveptr);
-  // strcpy(c->name, expandVariable(token));
-  strcpy(c->name, token);
+  if(token != NULL) {
+    token = expandVariable(token);
+    strcpy(c->name, token);
 
-  int count = 0;
-  token = strtok_r(NULL, " ", &saveptr);
-  while(token != NULL) {
-    c->args[count] = malloc(strlen(token) + 1 * sizeof(char));
-    strcpy(c->args[count], token);
+    // Get arguments
+    int count = 0;
+    free(token);
     token = strtok_r(NULL, " ", &saveptr);
-    count++;
+    while(token != NULL) {
+      token = expandVariable(token);
+      c->args[count] = malloc(strlen(token) + 1 * sizeof(char));
+      strcpy(c->args[count], token);
+      free(token);
+      token = strtok_r(NULL, " ", &saveptr);
+      count++;
+    }
+    c->numargs = count;
   }
-  c->numargs = count;
 
   return c;
 }
@@ -189,62 +195,49 @@ bool hasSpacesOnly(const char * input) {
 //-------------------------------------------------
     // Variable Exapansion of '$$'
 
-void expandVariable(char * in)
+char *expandVariable(char * in)
 {
   char * input = malloc(sizeof(char) * strlen(in));
   strcpy(input, in);
 
-  char* replacement = getenv("PID");
-
   int sizeInput = strlen(input);
-  int sizeReplacement = strlen(replacement);
+  if(sizeInput > 0) {
 
-  bool flag = false;
+    char * beg = NULL;
+    char * end = NULL;
+    char * output = NULL;
 
+    for (int i = 0; i < sizeInput; i++)
+    {
+      if(input[i] == '$' && input[i + 1] == '$') {
 
-  char * beg = NULL;
-  char * end = NULL;
-  char * output = NULL;
+        char* replacement = getenv("PID");
+        int sizeReplacement = strlen(replacement);
 
-  for (int i = 0; i < sizeInput; i++)
-  {
-    if(input[i] == '$' && input[i + 1] == '$') {
+        beg = substring(input, 0, i);
+        end = substring(input, i+2, sizeInput - i);
+        // printf("BEG: %s, PID: %s, END: %s\n", beg, replacement, end);
 
-      flag = true;
+        output = malloc(sizeof(char) * (sizeInput + 1 + sizeReplacement));
+        memset(output, '\0', (sizeof(char) * (sizeInput + 1 + sizeReplacement)));
 
-      beg = substring(input, 0, i);
-      end = substring(input, i+2, sizeInput - i);
-      printf("BEG: %s, PID: %s, END: %s\n", beg, replacement, end);
+        strcat(output, beg);
+        strcat(output, replacement);
+        strcat(output, end);
 
-      output = malloc(sizeof(char) * (sizeInput + 1 + sizeReplacement));
-      memset(output, '\0', (sizeof(char) * (sizeInput + 1 + sizeReplacement)));
+        free(beg);
+        free(end);
 
-      strcat(output, beg);
-      strcat(output, replacement);
-      strcat(output, end);
+        // printf("EXAPNDED INPUT: %s\n", output);
+        free(input);
+        input = output;
 
-      free(beg);
-      free(end);
-
-      printf("EXAPNDED INPUT: %s\n", output);
-      free(input);
-      input = output;
-
-      output = NULL;
-      sizeInput = strlen(input);
+        output = NULL;
+        sizeInput = strlen(input);
+      }
     }
   }
-
-  free(input);
-  // return input;
-  // 1. Allocate memory for new string
-  // 2. strcat last half of input string to new string
-  // 3. convert PID to string
-  // 4. Add PID as string to input at i with strcat
-  // 5. Add remainder of string with strcat
-  // 6. Free memory for temporary string
-  //-------------------------------------------------
-
+  return input;
 }
 
 
