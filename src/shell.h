@@ -229,8 +229,8 @@ bool hasSpacesOnly(const char * input) {
 
 char *expandVariable(char * in)
 {
-  printf("strlen: %d\n", strlen(in));
-  size_t buff = (strlen(in) + 1);
+  printf("strlen: %lu\n", strlen(in));
+  size_t buff = (strlen(in) + 2);
   char * input = malloc(sizeof(char) * buff);
   memset(input, '\0', sizeof(char) * buff);
   strlcpy(input, in, buff);
@@ -253,7 +253,7 @@ char *expandVariable(char * in)
         end = substring(input, i+2, sizeInput - 1);
         printf("BEG: %s, PID: %s, END: %s\n", beg, replacement, end);
 
-        output = malloc(sizeof(char) * (sizeInput + 1 + sizeReplacement));
+        output = (char *)malloc(sizeof(char) * (sizeInput + 1 + sizeReplacement));
         memset(output, '\0', (sizeof(char) * (sizeInput + 1 + sizeReplacement)));
 
         strcat(output, beg);
@@ -289,7 +289,7 @@ char * substring(char * str, int pos, int len)
   char * substring;
   int i;
 
-  substring = malloc(sizeof(char) * (len + 1));
+  substring = (char *)malloc(sizeof(char) * (len + 1));
   memset(substring, '\0', sizeof(char) * (len + 1));
 
   if(substring == NULL) {
