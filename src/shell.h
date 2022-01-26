@@ -153,6 +153,9 @@ void freeCommand(Command * c)
 }
 
 
+/*
+* Prints values of struct command variables
+*/
 void printCommand(Command * c)
 {
   printf("  CMD: %s\n", c->name);
@@ -226,7 +229,7 @@ bool hasSpacesOnly(const char * input) {
 
 char *expandVariable(char * in)
 {
-  char * input = malloc(sizeof(char) * strlen(in));
+  char * input = malloc(sizeof(char) * strlen(in) + 1);
   strcpy(input, in);
 
   int sizeInput = strlen(input);
