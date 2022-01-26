@@ -104,6 +104,9 @@ Command * createCommand(char * input)
 
   char * saveptr;
 
+  // TODO: Remove leading whitespace
+
+
   // Get first toke = name
   char * token = strtok_r(input, " ", &saveptr);
   if(token != NULL) {
@@ -123,6 +126,11 @@ Command * createCommand(char * input)
       count++;
     }
     c->numargs = count;
+  }
+
+  // Background Process?
+  if(strcmp(c->args[c->numargs - 1], "&") == 0) {
+    c->isBg = true;
   }
 
   return c;
@@ -154,6 +162,10 @@ void printCommand(Command * c)
     printf("%s ", c->args[i]);
   }
   printf("\n");
+
+  printf("  isBG: %d\n", c->isBg);
+
+
   fflush(stdout);
 }
 

@@ -66,17 +66,6 @@ int main(int argc, char *argv[])
 
       Command * command = createCommand(input);
       command->print(command);
-
-      // printf("  CMD: %s\n", command->name);
-      // printf("  ARGS: ");
-      // fflush(stdout);
-      // for (int i = 0; i < command->numargs; i++)
-      // {
-      //   printf("%s ", command->args[i]);
-      // }
-      // printf("\n");
-      // fflush(stdout);
-
       command->free(command);
 
     }
