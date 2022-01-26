@@ -248,7 +248,7 @@ char *expandVariable(char * in)
 
         beg = substring(input, 0, i+1);
         end = substring(input, i+2, sizeInput);
-        // printf("BEG: %s, PID: %s, END: %s\n", beg, replacement, end);
+        printf("BEG: %s, PID: %s, END: %s\n", beg, replacement, end);
 
         output = malloc(sizeof(char) * (sizeInput + 1 + sizeReplacement));
         memset(output, '\0', (sizeof(char) * (sizeInput + 1 + sizeReplacement)));
@@ -260,7 +260,7 @@ char *expandVariable(char * in)
         free(beg);
         free(end);
 
-        // printf("EXAPNDED INPUT: %s\n", output);
+        printf("EXAPNDED INPUT: %s\n", output);
         free(input);
         input = output;
 
@@ -287,7 +287,7 @@ char * substring(char * str, int pos, int len)
   int i;
 
   substring = malloc(sizeof(char) * (len + 1));
-  memset(substring, '\0', (len + 1) * sizeof(char));
+  memset(substring, '\0', sizeof(char) * (len + 1));
 
   if(substring == NULL) {
     exit(EXIT_FAILURE);
