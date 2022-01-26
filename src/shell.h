@@ -266,7 +266,7 @@ char *expandVariable(char * in)
         beg=NULL;
 
         if(i < sizeInput - 2) {
-          end = substring(input, i+2, sizeInput - 1);
+          end = substring(input, i+2, sizeInput - i);
           strcat(output, end);
           printf("4. BEG: %s, PID: %s, END: %s\n", beg, replacement, end);
           free(end);
