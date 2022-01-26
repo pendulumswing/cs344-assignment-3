@@ -233,7 +233,7 @@ char *expandVariable(char * in)
   size_t buff = (strlen(in) + 2);
   char * input = malloc(sizeof(char) * buff);
   memset(input, '\0', sizeof(char) * buff);
-  strlcpy(input, in, buff);
+  strcpy(input, in);
 
   int sizeInput = strlen(input);
   if(sizeInput > 0) {
