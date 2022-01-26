@@ -244,7 +244,7 @@ char *expandVariable(char * in)
 
     for (int i = 0; i < sizeInput; i++)
     {
-      printf("[i]: %c, [i + 1]: %c\n", input[i], input[i + 1]);
+      printf("[i]: %c, [i + 1]: %c   i: %d,  sizeInput: %d\n", input[i], input[i + 1], i, sizeInput);
       if(input[i] == '$' && input[i + 1] == '$') {
 
         char * replacement = getenv("PID");
