@@ -230,8 +230,8 @@ bool hasSpacesOnly(const char * input) {
 char *expandVariable(char * in)
 {
   printf("strlen: %d\n", strlen(in));
-  char * input = malloc(sizeof(char) * strlen(in) + 1);
-  memset(input, '\0', sizeof(char) * strlen(in) + 1);
+  char * input = malloc(sizeof(char) * (strlen(in) + 1));
+  memset(input, '\0', sizeof(char) * (strlen(in) + 1));
   strcpy(input, in);
 
   int sizeInput = strlen(input);
