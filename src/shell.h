@@ -250,14 +250,17 @@ char *expandVariable(char * in)
         char * replacement = getenv("PID");
         int sizeReplacement = strlen(replacement);
 
-        printf("BEG: %s, PID: %s, END: %s\n", beg, replacement, end);
 
         output = (char *)malloc(sizeof(char) * (sizeInput + 1 + sizeReplacement));
         memset(output, '\0', (sizeof(char) * (sizeInput + 1 + sizeReplacement)));
+        printf("output created\n");
 
         beg = substring(input, 0, i);
+        printf("1. BEG: %s, PID: %s, END: %s, OUTPUT: %s\n", beg, replacement, end, output);
         strcat(output, beg);
+        printf("2. BEG: %s, PID: %s, END: %s, OUTPUT: %s\n", beg, replacement, end, output);
         strcat(output, replacement);
+        printf("3. BEG: %s, PID: %s, END: %s, OUTPUT: %s\n", beg, replacement, end, output);
 
         free(beg);
         beg=NULL;
@@ -265,6 +268,7 @@ char *expandVariable(char * in)
         if(i < sizeInput - 2) {
           end = substring(input, i+2, sizeInput - 1);
           strcat(output, end);
+          printf("4. BEG: %s, PID: %s, END: %s\n", beg, replacement, end);
           free(end);
           end=NULL;
         }
