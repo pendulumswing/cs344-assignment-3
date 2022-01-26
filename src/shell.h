@@ -229,7 +229,6 @@ bool hasSpacesOnly(const char * input) {
 
 char *expandVariable(char * in)
 {
-  printf("strlen: %lu\n", strlen(in));
   size_t buff = (strlen(in) + 2);
   char * input = malloc(sizeof(char) * buff);
   memset(input, '\0', sizeof(char) * buff);
@@ -244,7 +243,7 @@ char *expandVariable(char * in)
 
     for (int i = 0; i < sizeInput; i++)
     {
-      printf("[i]: %c, [i + 1]: %c   i: %d,  sizeInput: %d\n", input[i], input[i + 1], i, sizeInput);
+      // printf("[i]: %c, [i + 1]: %c   i: %d,  sizeInput: %d\n", input[i], input[i + 1], i, sizeInput);
       if(input[i] == '$' && input[i + 1] == '$') {
 
         char * replacement = getenv("PID");
@@ -256,11 +255,8 @@ char *expandVariable(char * in)
         printf("output created\n");
 
         beg = substring(input, 0, i);
-        printf("1. BEG: %s, PID: %s, END: %s, OUTPUT: %s\n", beg, replacement, end, output);
         strcat(output, beg);
-        printf("2. BEG: %s, PID: %s, END: %s, OUTPUT: %s\n", beg, replacement, end, output);
         strcat(output, replacement);
-        printf("3. BEG: %s, PID: %s, END: %s, OUTPUT: %s\n", beg, replacement, end, output);
 
         free(beg);
         beg=NULL;
@@ -268,11 +264,11 @@ char *expandVariable(char * in)
         if(i < sizeInput - 2) {
           end = substring(input, i+2, sizeInput - i);
           strcat(output, end);
-          printf("4. BEG: %s, PID: %s, END: %s\n", beg, replacement, end);
           free(end);
           end=NULL;
         }
 
+        // printf("1. BEG: %s, PID: %s, END: %s, OUTPUT: %s\n", beg, replacement, end, output);
 
         printf("EXAPNDED INPUT: %s\n", output);
         free(input);
@@ -321,7 +317,6 @@ char * substring(char * str, int pos, int len)
 void trimLeadingWhitespace(char * input)
 {
   if(input[0] == ' ') {
-    printf("before: %s\n", input);
     int i = 0;
 
     while (input[i] == ' ')
@@ -333,7 +328,6 @@ void trimLeadingWhitespace(char * input)
     memset(input, '\0', (MAX_LINE_LENGTH) * sizeof(char));
     strcat(input, temp);
     free(temp);      
-    printf("after: %s\n", input);
   }
 }
 
