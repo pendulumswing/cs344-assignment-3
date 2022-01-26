@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
     else 
     {
       printf("You entered: %s\n", input);
-      printf("  PID: %s", pidstr);
+      printf("  PID: %s\n", pidstr);
 
       //TODO:
       // 1. Generate Command structs while not '<', '>', or '&'
