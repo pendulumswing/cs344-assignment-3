@@ -252,7 +252,6 @@ char *expandVariable(char * in)
 
         output = (char *)malloc(sizeof(char) * (sizeInput + 1 + sizeReplacement));
         memset(output, '\0', (sizeof(char) * (sizeInput + 1 + sizeReplacement)));
-        printf("output created\n");
 
         beg = substring(input, 0, i);
         strcat(output, beg);
@@ -270,7 +269,7 @@ char *expandVariable(char * in)
 
         // printf("1. BEG: %s, PID: %s, END: %s, OUTPUT: %s\n", beg, replacement, end, output);
 
-        printf("EXAPNDED INPUT: %s\n", output);
+        // printf("EXAPNDED INPUT: %s\n", output);
         free(input);
         input = output;
 
