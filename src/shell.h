@@ -286,8 +286,8 @@ char * substring(char * str, int pos, int len)
   char * substring;
   int i;
 
-  substring = malloc(sizeof(char) * (len + 1));
-  memset(substring, '\0', sizeof(char) * (len + 1));
+  substring = malloc(sizeof(char) * (len));
+  memset(substring, '\0', sizeof(char) * (len));
 
   if(substring == NULL) {
     exit(EXIT_FAILURE);
