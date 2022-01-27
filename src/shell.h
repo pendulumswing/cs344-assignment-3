@@ -81,8 +81,6 @@ char * expandVariable(char * input);
 char * substring(char * str, int pos, int len);
 void trimLeadingWhitespace(char * input);
 
-/*******************************************************
-
 
 
 
@@ -127,8 +125,6 @@ void initCommand(Command * c)
   c->fsout = NULL;
 
   c->isBg = false;
-  c->isOp = false;
-  c->op = '\0';
 
   c->parseInput = &parseCommandInput;
   c->parseStreams = &parseCommandStreams;
@@ -179,13 +175,13 @@ void parseCommandStreams(Command * c)
   for (int i = 0; i < c->numargs; i++)
   {
     // Input Stream
-    if(strcmp(c->args[i], "<") == 0 && (i - 1) < c->numargs)
+    if(strcmp(c->args[i], "<") == 0 && (i + 1) < c->numargs)
     {
       strcpy(c->finpath, c->args[i + 1]);
     }
 
     // Output Stream
-    if(strcmp(c->args[i], ">") == 0 && (i - 1) < c->numargs)
+    if(strcmp(c->args[i], ">") == 0 && (i + 1) < c->numargs)
     {
       strcpy(c->foutpath, c->args[i + 1]);
     }
