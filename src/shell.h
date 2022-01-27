@@ -13,6 +13,11 @@
 
 
 
+/*******************************************************
+*
+* STRUCTS
+*
+*******************************************************/
 
 /*
 * struct COMMAND
@@ -21,7 +26,6 @@
 typedef struct command {
 
   char name[MAX_FILE_LENGTH];
-  // char args[MAX_ARGS][MAX_FILE_LENGTH];
   char * args[MAX_ARGS];
   int numargs;
 
@@ -33,11 +37,10 @@ typedef struct command {
   FILE * fsout;
 
   bool isBg;                      // Background Process??
-  bool isOp;                      // Operator such as '<', '>' or '&'
-  char op;                        // Actual char for operator
 
   void (*parseInput) (char *, struct command *);
   void (*parseStreams) (struct command *);
+  void (*trimArgs) (struct command *);
   void (*free) (struct command *);
   void (*print) (struct command *);
 
@@ -58,25 +61,37 @@ typedef struct commandline {
 
 
 
-/*
-* Function Prototypes
-*/
+/*******************************************************
+*
+* Function PROTOTYPES
+*
+*******************************************************/
+
 void shellPrompt();
 void getInput(char * input, int size);
 bool hasSpacesOnly(const char * input);
+Command * createCommand();
 void initCommand(Command * c);
 void parseCommandInput(char * input, Command * c);
 void parseCommandStreams(Command * c);
-Command * createCommand();
+void trimCommandArgs(Command * c);
 void freeCommand(Command * c);
 void printCommand(Command * c);
 char * expandVariable(char * input);
 char * substring(char * str, int pos, int len);
 void trimLeadingWhitespace(char * input);
 
+/*******************************************************
 
 
 
+
+
+/*******************************************************
+*
+* Function DEFINITIONS
+*
+*******************************************************/
 /*
 * Creates command struct and initializes it.
 * Returns the new struct.
@@ -117,6 +132,7 @@ void initCommand(Command * c)
 
   c->parseInput = &parseCommandInput;
   c->parseStreams = &parseCommandStreams;
+  c->trimArgs = &trimCommandArgs;
   c->free = &freeCommand;
   c->print = &printCommand;
 }
@@ -153,6 +169,11 @@ void parseCommandInput(char * input, Command * c)
 }
 
 
+
+/*
+* Identifies file streams and if process will be in the background.
+* Special operators are: <, >, &
+*/
 void parseCommandStreams(Command * c)
 {
   for (int i = 0; i < c->numargs; i++)
@@ -174,6 +195,39 @@ void parseCommandStreams(Command * c)
       c->isBg = true;
     }
   }
+}
+
+
+
+/*
+* Removes args from args list after first special operator encountered.
+* Special operators are: <, >, &
+*/
+void trimCommandArgs(Command * c)
+{
+  bool flag = false;
+  int newnumargs = c->numargs;    // Track new number of args
+
+  for (int i = 0; i < c->numargs; i++)
+  {
+
+    // Set for first special operator found
+    if( strcmp(c->args[i], "<") == 0 || 
+        strcmp(c->args[i], ">") == 0 ||
+        strcmp(c->args[i], "&") == 0 )
+    {
+      flag = true;
+    }
+
+    // Remove all args after flag is set
+    if(flag) {
+      // printf("removing: %s\n", c->args[i]);
+      free(c->args[i]);
+      c->args[i] = NULL;
+      newnumargs--;
+    }
+  }
+  c->numargs = newnumargs;
 }
 
 
@@ -270,9 +324,10 @@ bool hasSpacesOnly(const char * input)
 }
 
 
-//-------------------------------------------------
-    // Variable Exapansion of '$$'
 
+/*
+* Expands any instance of '$$' to the shell process id.
+*/
 char * expandVariable(char * in)
 {
   size_t buff = (strlen(in) + 2);
@@ -329,9 +384,6 @@ char * expandVariable(char * in)
 
 
 
-
-
-
 /*
 * Creates a new substring from a given string starting at position pos of len chars
 * SOURCE: https://bit.ly/3IAdLPF, Date: 1/25/22, Adopted
@@ -358,7 +410,9 @@ char * substring(char * str, int pos, int len)
 
 
 
-// Check for leading whitespace and trim if necessary
+/*
+* Checks for leading whitespace and trim if necessary
+*/
 void trimLeadingWhitespace(char * input)
 {
   if(input[0] == ' ') {

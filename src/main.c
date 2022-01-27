@@ -63,16 +63,22 @@ int main(int argc, char *argv[])
       printf("  PID: %s\n", pidstr);
       printf("You entered: %s\n", input);
 
-      //TODO:
-      // 1. Generate Command structs while not '<', '>', or '&'
-
-
-      // Create command and parse input string
+      // Create command and parse input string into args
+      // and identify file streams and if background process
       Command * c = createCommand();
       c->parseInput(input, c);
       c->parseStreams(c);
+      c->trimArgs(c);
+
+
+      // TODO: Create child process with command info...
+
+
+
       c->print(c);
       c->free(c);
+
+
     }
   } while (strcmp(input, "exit") != 0);
 
