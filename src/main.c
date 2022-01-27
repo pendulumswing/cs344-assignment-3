@@ -39,6 +39,8 @@ int main(int argc, char *argv[])
   sprintf(pidstr, "%d", pid);  // Convert pid to string
   setenv("PID", pidstr, 1);
 
+  printf("HOME: %s\n", getenv("HOME"));
+
 
 
   do
