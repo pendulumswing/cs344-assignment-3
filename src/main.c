@@ -39,7 +39,14 @@ int main(int argc, char *argv[])
   sprintf(pidstr, "%d", pid);  // Convert pid to string
   setenv("PID", pidstr, 1);
 
-  printf("HOME: %s\n", getenv("HOME"));
+
+  printf("Ennironment Variables:\n");
+  printf("  PID: %s\n", getenv("PID"));
+  printf("  HOME: %s\n", getenv("HOME"));
+
+  // Track current working directory
+  char cwd[MAX_LINE_LENGTH];
+  memset(cwd, '\0', MAX_LINE_LENGTH * sizeof(char));
 
 
 
@@ -75,13 +82,21 @@ int main(int argc, char *argv[])
 
       // Execute BUILT-IN commands
       if(strcmp(c->name, "exit") == 0) {
-        printf("BUILT-IN CMD: %s", c->name);
+        printf("BUILT-IN CMD: %s\n", c->name);
 
       } else if(strcmp(c->name, "cd") == 0) {
-        printf("BUILT-IN CMD: %s", c->name);
+        printf("BUILT-IN CMD: %s\n", c->name);
+        // Change working directory to given
+        
+        getcwd(cwd, MAX_LINE_LENGTH);
+        printf("CWD: %s\n", cwd);
+        chdir(c->args[0]);
+        getcwd(cwd, MAX_LINE_LENGTH);
+        printf("CWD: %s\n", cwd);
+
 
       }else if(strcmp(c->name, "status") == 0) {
-        printf("BUILT-IN CMD: %s", c->name);
+        printf("BUILT-IN CMD: %s\n", c->name);
 
       } 
       
@@ -104,6 +119,10 @@ int main(int argc, char *argv[])
         } else if(child == 0){
 
           // CHILD process executes this
+          // 1. I/O Redirection using dup2 first
+          // 2. Execute command with exec()
+
+
           printf("  Child's pid = %d\n", getpid());
           fflush(stdout);
           printf("  Child will execute this process: %s\n", c->name);
