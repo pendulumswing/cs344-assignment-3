@@ -67,10 +67,11 @@ int main(int argc, char *argv[])
       // 1. Generate Command structs while not '<', '>', or '&'
 
 
-
-      Command * command = createCommand(input);
-      command->print(command);
-      command->free(command);
+      // Create command and parse input string
+      Command * c = createCommand();
+      c->parse(input, c);
+      c->print(c);
+      c->free(c);
 
     }
   } while (strcmp(input, "exit") != 0);

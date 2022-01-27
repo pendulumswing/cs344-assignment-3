@@ -36,6 +36,7 @@ typedef struct command {
   bool isOp;                      // Operator such as '<', '>' or '&'
   char op;                        // Actual char for operator
 
+  void (*parse) (char *, struct command *);
   void (*free) (struct command *);
   void (*print) (struct command *);
 
@@ -56,12 +57,35 @@ typedef struct commandline {
 
 
 
+/*
+* Function Prototypes
+*/
+void shellPrompt();
+void getInput(char * input, int size);
+bool hasSpacesOnly(const char * input);
+void initCommand(Command * c);
+void parseCommand(char * input, Command * c);
+Command * createCommand();
 void freeCommand(Command * c);
 void printCommand(Command * c);
-char * substring(char * str, int pos, int len);
 char * expandVariable(char * input);
+char * substring(char * str, int pos, int len);
 void trimLeadingWhitespace(char * input);
 
+
+
+
+/*
+* Creates command struct and initializes it.
+* Returns the new struct.
+*/
+Command * createCommand()
+{
+  Command * c = malloc(sizeof(Command));
+  initCommand(c);
+
+  return c;
+}
 
 
 
@@ -89,6 +113,7 @@ void initCommand(Command * c)
   c->isOp = false;
   c->op = '\0';
 
+  c->parse = &parseCommand;
   c->free = &freeCommand;
   c->print = &printCommand;
 }
@@ -96,17 +121,11 @@ void initCommand(Command * c)
 
 
 /*
-* Creates command struct and populates fields based on tokens
+* Parses an input string into command struct and populates fields based on tokens
 */
-Command * createCommand(char * input)
+void parseCommand(char * input, Command * c)
 {
-  Command * c = malloc(sizeof(Command));
-  initCommand(c);
-
   char * saveptr;
-
-  // TODO: Remove leading whitespace
-  
 
   // Get first toke = name
   char * token = strtok_r(input, " ", &saveptr);
@@ -133,8 +152,6 @@ Command * createCommand(char * input)
   if(c->numargs > 0 && strcmp(c->args[c->numargs - 1], "&") == 0) {
     c->isBg = true;
   }
-
-  return c;
 }
 
 
@@ -188,7 +205,8 @@ void initCommandLine(CommandLine * cl)
 /*
 * Displays a colon prompt and flushes the output stream.
 */
-void shellPrompt() {
+void shellPrompt() 
+{
   printf(": ");
   fflush(stdout);
 }
@@ -209,7 +227,8 @@ void getInput(char * input, int size)
 /*
 * Returns true if only characters in string are spaces.
 */
-bool hasSpacesOnly(const char * input) {
+bool hasSpacesOnly(const char * input) 
+{
   int i = 0;
   bool spacesOnly = true;
   while (input[i] != '\0')
@@ -227,7 +246,7 @@ bool hasSpacesOnly(const char * input) {
 //-------------------------------------------------
     // Variable Exapansion of '$$'
 
-char *expandVariable(char * in)
+char * expandVariable(char * in)
 {
   size_t buff = (strlen(in) + 2);
   char * input = malloc(sizeof(char) * buff);
@@ -329,38 +348,5 @@ void trimLeadingWhitespace(char * input)
     free(temp);      
   }
 }
-
-
-// void expandVariable$$(char * input, char * replacement)
-// {
-//   int size = strlen(input);
-//   char * temp = malloc(sizeof(char) * (size + 1));
-//   int sizeReplacement = strlen(replacement);
-
-//   for (int i = 0; i < size; i++)
-//   {
-//     if(input[i] == '$' && input[i + 1] == '$') {
-//       // printf("PID: %d\n", stoi(replacement));
-//       printf("PID STR: %s\n", replacement);
-
-//       // strcpy()
-
-
-//     }
-//   }
-
-//   free(temp);
-
-//   // 1. Allocate memory for new string
-//   // 2. strcat last half of input string to new string
-//   // 3. convert PID to string
-//   // 4. Add PID as string to input at i with strcat
-//   // 5. Add remainder of string with strcat
-//   // 6. Free memory for temporary string
-//   //-------------------------------------------------
-
-// }
-
-
 
 #endif
