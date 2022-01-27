@@ -73,27 +73,74 @@ int main(int argc, char *argv[])
       c->trimArgs(c);
 
 
-      // Check for built-in commands
+      // Execute BUILT-IN commands
       if(strcmp(c->name, "exit") == 0) {
         printf("BUILT-IN CMD: %s", c->name);
 
-      }
-
-      if(strcmp(c->name, "cd") == 0) {
+      } else if(strcmp(c->name, "cd") == 0) {
         printf("BUILT-IN CMD: %s", c->name);
 
-      }
-
-      if(strcmp(c->name, "status") == 0) {
+      }else if(strcmp(c->name, "status") == 0) {
         printf("BUILT-IN CMD: %s", c->name);
 
+      } 
+      
+      // Execute OTHER commands
+      else {
+
+        int   childStatus;
+        printf("  Parent's pid = %d\n", getpid());
+        fflush(stdout);
+
+        // Create CHILD process
+        pid_t child = fork();
+
+        if(child == -1){
+
+          // Handle creation failure
+          perror("fork() failed!");
+          fflush(stdout);
+          exit(1);
+        } else if(child == 0){
+
+          // CHILD process executes this
+          printf("  Child's pid = %d\n", getpid());
+          fflush(stdout);
+          printf("  Child will execute this process: %s\n", c->name);
+          fflush(stdout);
+          printf("    with args: ");
+                for (int i = 0; i < c->numargs; i++)
+                {
+                  printf("%s ", c->args[i]);
+                }
+                printf("\n");
+          fflush(stdout);
+          sleep(3);
+          exit(0);  // Be sure to exit Child process (not continue through rest of code)
+
+        } else {
+
+          // PARENT process executes this
+          pid_t childPid = waitpid(child, &childStatus, c->isBg ? WNOHANG : 0);  // Wait on child to finish
+
+          printf("  WAITPID returned value %d\n", childPid);
+          fflush(stdout);
+
+          // Check STATUS of child process termination
+          if(WIFEXITED(childStatus)){
+            printf("  CHILD %d exited normally with status %d\n", childPid, WEXITSTATUS(childStatus));
+            fflush(stdout);
+          } else{
+            printf("  CHILD %d exited abnormally due to signal %d\n", childPid, WTERMSIG(childStatus));
+            fflush(stdout);
+          }
+          printf("PARENT is done waiting. The pid of child that terminated is %d\n", childPid);
+          fflush(stdout);
+        
+        }
+        printf("The process with pid %d is returning from main\n", getpid());
+        fflush(stdout);
       }
-
-
-      // TODO: Create child process with command info...
-
-
-
 
       c->print(c);
       c->free(c);
@@ -101,10 +148,6 @@ int main(int argc, char *argv[])
 
     }
   } while (strcmp(input, "exit") != 0);
-
-  // Exit Command
-  
-
 
   return EXIT_SUCCESS;
 }
