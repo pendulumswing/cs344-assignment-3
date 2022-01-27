@@ -90,7 +90,11 @@ int main(int argc, char *argv[])
         
         getcwd(cwd, MAX_LINE_LENGTH);
         printf("CWD: %s\n", cwd);
-        chdir(c->args[0]);
+        if(c->numargs == 0) {
+          chdir(getenv("HOME"));
+        } else {
+          chdir(c->args[0]);
+        }
         getcwd(cwd, MAX_LINE_LENGTH);
         printf("CWD: %s\n", cwd);
 
