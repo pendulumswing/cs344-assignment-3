@@ -36,7 +36,8 @@ typedef struct command {
   bool isOp;                      // Operator such as '<', '>' or '&'
   char op;                        // Actual char for operator
 
-  void (*parse) (char *, struct command *);
+  void (*parseInput) (char *, struct command *);
+  void (*parseStreams) (struct command *);
   void (*free) (struct command *);
   void (*print) (struct command *);
 
@@ -64,7 +65,8 @@ void shellPrompt();
 void getInput(char * input, int size);
 bool hasSpacesOnly(const char * input);
 void initCommand(Command * c);
-void parseCommand(char * input, Command * c);
+void parseCommandInput(char * input, Command * c);
+void parseCommandStreams(Command * c);
 Command * createCommand();
 void freeCommand(Command * c);
 void printCommand(Command * c);
@@ -113,7 +115,8 @@ void initCommand(Command * c)
   c->isOp = false;
   c->op = '\0';
 
-  c->parse = &parseCommand;
+  c->parseInput = &parseCommandInput;
+  c->parseStreams = &parseCommandStreams;
   c->free = &freeCommand;
   c->print = &printCommand;
 }
@@ -123,7 +126,7 @@ void initCommand(Command * c)
 /*
 * Parses an input string into command struct and populates fields based on tokens
 */
-void parseCommand(char * input, Command * c)
+void parseCommandInput(char * input, Command * c)
 {
   char * saveptr;
 
@@ -147,10 +150,29 @@ void parseCommand(char * input, Command * c)
     }
     c->numargs = count;
   }
+}
 
-  // Background Process?
-  if(c->numargs > 0 && strcmp(c->args[c->numargs - 1], "&") == 0) {
-    c->isBg = true;
+
+void parseCommandStreams(Command * c)
+{
+  for (int i = 0; i < c->numargs; i++)
+  {
+    // Input Stream
+    if(strcmp(c->args[i], "<") == 0 && (i - 1) < c->numargs)
+    {
+      strcpy(c->finpath, c->args[i + 1]);
+    }
+
+    // Output Stream
+    if(strcmp(c->args[i], ">") == 0 && (i - 1) < c->numargs)
+    {
+      strcpy(c->foutpath, c->args[i + 1]);
+    }
+
+    // Background Process
+    if(c->numargs > 0 && strcmp(c->args[c->numargs - 1], "&") == 0) {
+      c->isBg = true;
+    }
   }
 }
 
@@ -184,6 +206,11 @@ void printCommand(Command * c)
   }
   printf("\n");
 
+  printf("  finname: %s\n", c->finname);
+  printf("  finpath: %s\n", c->finpath);
+  printf("  foutname: %s\n", c->foutname);
+  printf("  foutpath: %s\n", c->foutpath);
+  
   printf("  isBG: %d\n", c->isBg);
 
 

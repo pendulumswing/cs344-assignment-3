@@ -69,10 +69,10 @@ int main(int argc, char *argv[])
 
       // Create command and parse input string
       Command * c = createCommand();
-      c->parse(input, c);
+      c->parseInput(input, c);
+      c->parseStreams(c);
       c->print(c);
       c->free(c);
-
     }
   } while (strcmp(input, "exit") != 0);
 
