@@ -29,41 +29,37 @@ int main(int argc, char *argv[])
 
   char input[MAX_LINE_LENGTH];
   int inputlen = 0;
-  // char variableExpandStr[MAX_LINE_LENGTH];
+  char cwd[MAX_LINE_LENGTH];
+  memset(cwd, '\0', MAX_LINE_LENGTH * sizeof(char));
 
-  // CommandLine cl;
 
   // Get smallsh PID, as int and string
   int pid = getpid();
   char pidstr[12];
   sprintf(pidstr, "%d", pid);  // Convert pid to string
   setenv("PID", pidstr, 1);
-
-
   printf("Ennironment Variables:\n");
   printf("  PID: %s\n", getenv("PID"));
   printf("  HOME: %s\n", getenv("HOME"));
-
-  // Track current working directory
-  char cwd[MAX_LINE_LENGTH];
-  memset(cwd, '\0', MAX_LINE_LENGTH * sizeof(char));
 
 
 
   do
   {
-    // Prompt for shell
+    // PROMPT for shell
     shellPrompt();
 
-    // Get user command string
+
+    // GET user command string
     getInput(input, MAX_LINE_LENGTH);
     inputlen = strlen(input);
 
-    // Check for leading whitespace and trim if necessary
+
+    // LEADING WHITESPACE - Check for leading whitespace and trim if necessary
     trimLeadingWhitespace(*&input);
 
 
-    // 2. Handle Comments & Blank Lines
+    // COMMENTS & BLANK LINES - Reprompt if found
     if(input[0] == '#' || inputlen == 0 || hasSpacesOnly(input)) {
       printf("IGNORING Comments, blank lines or only spaces\n");
     } 
@@ -72,19 +68,27 @@ int main(int argc, char *argv[])
       printf("  PID: %s\n", pidstr);
       printf("You entered: %s\n", input);
 
-      // Create command and parse input string into args
-      // and identify file streams and if background process
+      // CREATE command and PARSE input string into args.
+      // Identify file streams and if process is to run in background.
       Command * c = createCommand();
       c->parseInput(input, c);
       c->parseStreams(c);
       c->trimArgs(c);
 
 
-      // Execute BUILT-IN commands
+      //----------------------------------------------------------------------------
+      // BUILT-IN commands
+      //----------------------------------------------------------------------------
+  
+      // EXIT
       if(strcmp(c->name, "exit") == 0) {
         printf("BUILT-IN CMD: %s\n", c->name);
 
-      } else if(strcmp(c->name, "cd") == 0) {
+        // TODO: Terminate all child processes/jobs before parent
+
+      } 
+      // CD
+      else if(strcmp(c->name, "cd") == 0) {
         printf("BUILT-IN CMD: %s\n", c->name);
         // Change working directory to given
         
@@ -99,12 +103,21 @@ int main(int argc, char *argv[])
         printf("CWD: %s\n", cwd);
 
 
-      }else if(strcmp(c->name, "status") == 0) {
+      }
+      // STATUS 
+      else if(strcmp(c->name, "status") == 0) {
         printf("BUILT-IN CMD: %s\n", c->name);
+
+        // TODO:
+        // 1. Print exit status of terminating signal of the last foreground process
+        //   a. If run before any foreground command, then it should simply return exit statu 0
+        //   b. Built-in commands do not count as foreground processes (should be ignored)
 
       } 
       
-      // Execute OTHER commands
+      //----------------------------------------------------------------------------
+      // OTHER commands
+      //----------------------------------------------------------------------------
       else {
 
         int   childStatus;
