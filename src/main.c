@@ -73,7 +73,25 @@ int main(int argc, char *argv[])
       c->trimArgs(c);
 
 
+      // Check for built-in commands
+      if(strcmp(c->name, "exit") == 0) {
+        printf("BUILT-IN CMD: %s", c->name);
+
+      }
+
+      if(strcmp(c->name, "cd") == 0) {
+        printf("BUILT-IN CMD: %s", c->name);
+
+      }
+
+      if(strcmp(c->name, "status") == 0) {
+        printf("BUILT-IN CMD: %s", c->name);
+
+      }
+
+
       // TODO: Create child process with command info...
+
 
 
 
