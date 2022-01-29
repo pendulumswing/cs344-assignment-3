@@ -6,6 +6,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <sys/types.h>
+#include <sys/wait.h>    // for waitpid
 
 #define MAX_LINE_LENGTH 2048
 #define MAX_FILE_LENGTH 256
