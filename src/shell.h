@@ -172,7 +172,7 @@ void parseCommandInput(char * input, Command * c)
     token = strtok_r(NULL, " ", &saveptr);
 
     while(token != NULL) {
-      token = expandVariable(token);
+      token = expandVariable(token);   // free(token) if mutated by expandVariable
       
       //---------------------------------
       //   "<" - INPUT
@@ -180,8 +180,12 @@ void parseCommandInput(char * input, Command * c)
       if(strcmp(token, "<") == 0)
       {
         c->hasInput = true;
-        token = strtok_r(NULL, " ", &saveptr);  // Get next token
+        free(token);
+
+        // Get next token
+        token = strtok_r(NULL, " ", &saveptr);
         if(token != NULL) {
+          token = expandVariable(token);
           strcpy(c->finpath, token);
           strcpy(c->finname, token);
         }
@@ -193,8 +197,12 @@ void parseCommandInput(char * input, Command * c)
       else if (strcmp(token, ">") == 0)
       {
         c->hasOutput = true;
-        token = strtok_r(NULL, " ", &saveptr);  // Get next token
+        free(token);
+
+        // Get next token
+        token = strtok_r(NULL, " ", &saveptr);
         if(token != NULL) {
+          token = expandVariable(token);
           strcpy(c->foutpath, token);
           strcpy(c->foutname, token);
         }
@@ -209,9 +217,12 @@ void parseCommandInput(char * input, Command * c)
         strcpy(c->args[argsCount], token);
         argsCount++;
       }
-      // free(token);  // Necessary?
+
+      free(token);
+      
+      // Get next token
       if(token != NULL) {
-        token = strtok_r(NULL, " ", &saveptr);  // Get next token
+        token = strtok_r(NULL, " ", &saveptr);
       }
     }
 
