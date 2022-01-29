@@ -15,12 +15,11 @@
 *   Program Title: Assignment 3: smallsh
 *   Author: Jason Brown
 *   ONID: brownja4
-*   Date: 01/24/2022
+*   Date: 01/29/2022
 */
 
 /*
-*   Process the file provided as an argument to the program to
-*   create a linked list of movie structs and print out the list.
+*   Small shell program with limited functionality similar to BASH.
 *   Compile the program as follows:
 *       gcc --std=gnu99 -o smallsh smallsh.c
 */
@@ -41,9 +40,7 @@ int main(int argc, char *argv[])
   printf("Ennironment Variables:\n");
   printf("  PID: %s\n", getenv("PID"));
   printf("  HOME: %s\n", getenv("HOME"));
-
-
-
+  unsigned int pids[MAX_ARGS];    // To store running process PIDS
 
 
   do
@@ -79,22 +76,36 @@ int main(int argc, char *argv[])
 
 
       //----------------------------------------------------------------------------
-      // BUILT-IN commands
+      //
+      //    BUILT-IN commands
+      //
       //----------------------------------------------------------------------------
   
-      // EXIT
+      //-------------------------------------------------
+      //      EXIT
+      // Terminate all child processes/jobs before parent
+      // Then exit parent
+      //-------------------------------------------------
       if(strcmp(c->name, "exit") == 0) {
         printf("BUILT-IN CMD: %s\n", c->name);
 
         // TODO: Terminate all child processes/jobs before parent
 
+
+
+
       } 
-      // CD
+
+      //-------------------------------------------------
+      //      CD
+      // Change working directory to given directory.
+      // If no given directory, change to HOME directory.
+      //-------------------------------------------------
       else if(strcmp(c->name, "cd") == 0) {
-        printf("BUILT-IN CMD: %s\n", c->name);
-        // Change working directory to given
+        printf("BUILT-IN CMD: %s\n", c->name);  // DEBUG
         
-        // Print CWD
+        
+        // DEBUG: Print CWD
         getcwd(cwd, MAX_LINE_LENGTH);
         printf("CWD: %s\n", cwd);
 
@@ -105,43 +116,54 @@ int main(int argc, char *argv[])
           chdir(c->args[1]);
         }
 
-        // Print CWD
+        // DEBUG: Print CWD
         getcwd(cwd, MAX_LINE_LENGTH);
         printf("CWD: %s\n", cwd);
 
-
       }
-      // STATUS 
+
+      //-------------------------------------------------
+      //      STATUS
+      // 1. Print exit status of terminating signal of the last foreground process
+      //   a. If ran before any foreground command, then it should return exit status 0
+      //   b. Built-in commands do not count as foreground processes (should be ignored)
+      //-------------------------------------------------
       else if(strcmp(c->name, "status") == 0) {
         printf("BUILT-IN CMD: %s\n", c->name);
 
         // TODO:
         // 1. Print exit status of terminating signal of the last foreground process
-        //   a. If run before any foreground command, then it should simply return exit statu 0
+        //   a. If ran before any foreground command, then it should return exit status 0
         //   b. Built-in commands do not count as foreground processes (should be ignored)
+
+
+
+
 
       } 
       
       //----------------------------------------------------------------------------
-      // OTHER commands
+      //
+      //    OTHER commands
+      //
       //----------------------------------------------------------------------------
       else {
 
         int   childStatus;
-        printf("  Parent's pid = %d\n", getpid());
+        printf("  Parent's pid = %d\n", getpid());  // DEBUG
         fflush(stdout);
 
-        // Fork CHILD process
+        //-------------------------------------------------
+        // FORK child process
+        //-------------------------------------------------
         pid_t spawnPid = fork();
-
-
-        // CHILD PID SWITCH
- 
 
         switch (spawnPid)
         {
 
-          // FAILED
+          //-------------------------------------------------
+          //    FAILED
+          //-------------------------------------------------
           case -1:
                 // Handle creation failure
                 perror("fork() failed!");
@@ -150,7 +172,9 @@ int main(int argc, char *argv[])
                 break;
 
 
-          // CHILD process executes this
+          //-------------------------------------------------
+          //    CHILD process executes this
+          //-------------------------------------------------
           case 0:
                 // 1. I/O Redirection using dup2 first
 
@@ -177,7 +201,10 @@ int main(int argc, char *argv[])
                 exit(2);    // Be sure to exit Child process (not continue through rest of code)
                 break;
           
-          // PARENT process executes this
+
+          //-------------------------------------------------
+          //    PARENT process executes this
+          //-------------------------------------------------
           default:
                 // pid_t childPid = waitpid(spawnPid, &childStatus, c->isBg ? WNOHANG : 0);  // Wait on child to finish
                 spawnPid = waitpid(spawnPid, &childStatus, c->isBg ? WNOHANG : 0);  // Wait on child to finish
@@ -202,7 +229,7 @@ int main(int argc, char *argv[])
         fflush(stdout);
       }
 
-      c->print(c);
+      c->print(c);  // DEBUG
       c->free(c);
 
     }
