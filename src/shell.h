@@ -153,10 +153,17 @@ void parseCommandInput(char * input, Command * c)
     token = expandVariable(token);
     strcpy(c->name, token);
 
+
+    // Copy naem of command to first in list of args
+    c->args[0] = malloc(strlen(token) + 1 * sizeof(char));
+    strcpy(c->args[0], token);
+
+
     // Get arguments
-    int count = 0;
+    int count = 1;
     free(token);
     token = strtok_r(NULL, " ", &saveptr);
+
     while(token != NULL) {
       token = expandVariable(token);
       c->args[count] = malloc(strlen(token) + 1 * sizeof(char));
