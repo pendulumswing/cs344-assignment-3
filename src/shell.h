@@ -38,6 +38,8 @@ typedef struct command {
   FILE * fsin;
   FILE * fsout;
 
+  bool hasInput;
+  bool hasOutput;
   bool isBg;                      // Background Process??
 
   void (*parseInput) (char *, struct command *);
@@ -131,6 +133,8 @@ void initCommand(Command * c)
   c->fsin = NULL;
   c->fsout = NULL;
 
+  c->hasInput = false;
+  c->hasOutput = false;
   c->isBg = false;
 
   c->parseInput = &parseCommandInput;
@@ -149,32 +153,69 @@ void parseCommandInput(char * input, Command * c)
 {
   char * saveptr;
 
-  // Get first toke = name
+  //---------------------------------
+  //   NAME
+  //---------------------------------
   char * token = strtok_r(input, " ", &saveptr);
   if(token != NULL) {
     token = expandVariable(token);
     strcpy(c->name, token);
 
-
-    // Copy naem of command to first in list of args
+    // Copy name of command to first in list of args
     c->args[0] = malloc(strlen(token) + 1 * sizeof(char));
     strcpy(c->args[0], token);
 
 
-    // Get arguments
-    int count = 1;
+    // Get Arguments
+    int argsCount = 1;
     free(token);
     token = strtok_r(NULL, " ", &saveptr);
 
     while(token != NULL) {
       token = expandVariable(token);
-      c->args[count] = malloc(strlen(token) + 1 * sizeof(char));
-      strcpy(c->args[count], token);
-      free(token);
-      token = strtok_r(NULL, " ", &saveptr);
-      count++;
+      
+      //---------------------------------
+      //   "<" - INPUT
+      //---------------------------------
+      if(strcmp(token, "<") == 0)
+      {
+        c->hasInput = true;
+        token = strtok_r(NULL, " ", &saveptr);  // Get next token
+        if(token != NULL) {
+          strcpy(c->finpath, token);
+          strcpy(c->finname, token);
+        }
+      }
+
+      //---------------------------------
+      //   ">" - OUTPUT
+      //---------------------------------
+      else if (strcmp(token, ">") == 0)
+      {
+        c->hasOutput = true;
+        token = strtok_r(NULL, " ", &saveptr);  // Get next token
+        if(token != NULL) {
+          strcpy(c->foutpath, token);
+          strcpy(c->foutname, token);
+        }
+      }
+
+      //---------------------------------
+      //   ARGS
+      //---------------------------------
+      else
+      {
+        c->args[argsCount] = malloc(strlen(token) + 1 * sizeof(char));
+        strcpy(c->args[argsCount], token);
+        argsCount++;
+      }
+      // free(token);  // Necessary?
+      if(token != NULL) {
+        token = strtok_r(NULL, " ", &saveptr);  // Get next token
+      }
     }
-    c->numargs = count;
+
+    c->numargs = argsCount;
   }
 }
 
@@ -274,7 +315,11 @@ void printCommand(Command * c)
   printf("  finpath: %s\n", c->finpath);
   printf("  foutname: %s\n", c->foutname);
   printf("  foutpath: %s\n", c->foutpath);
-  
+  printf("  fsin: %p\n", c->fsin);
+  printf("  fsout: %p\n", c->fsin);
+
+  printf("  hasInput: %d\n", c->hasInput);
+  printf("  hasOutput: %d\n", c->hasOutput);
   printf("  isBG: %d\n", c->isBg);
 
 

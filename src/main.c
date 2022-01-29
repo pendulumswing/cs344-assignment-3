@@ -41,6 +41,9 @@ int main(int argc, char *argv[])
   printf("  PID: %s\n", getenv("PID"));
   printf("  HOME: %s\n", getenv("HOME"));
   unsigned int pids[MAX_ARGS];    // To store running process PIDS
+  bool allowbg = true;            // Toggle with SIGTSTP  (CTRL-Z)
+  char * fgonlymessage = "Entering foreground-only mode (& is now ignored)\n"; // count = 50 chars
+  char * fgonlyexitmessage = "Exiting foreground-only mode\n"; // count = 30 chars
 
 
   do
@@ -182,15 +185,17 @@ int main(int argc, char *argv[])
                 // 2. Execute command with exec()
                 printf("  Child's pid = %d\n", getpid());
                 fflush(stdout);
-                printf("  Child will execute this process: %s\n", c->name);
-                fflush(stdout);
-                printf("    with args: ");
-                      for (int i = 0; i < c->numargs; i++)
-                      {
-                        printf("%s ", c->args[i]);
-                      }
-                      printf("\n");
-                fflush(stdout);
+
+                // DEBUG
+                // printf("  Child will execute this process: %s\n", c->name);
+                // fflush(stdout);
+                // printf("    with args: ");
+                //       for (int i = 0; i < c->numargs; i++)
+                //       {
+                //         printf("%s ", c->args[i]);
+                //       }
+                //       printf("\n");
+                // fflush(stdout);
 
                 // // Replace current program with provided one
                 execvp(c->name, c->args);
