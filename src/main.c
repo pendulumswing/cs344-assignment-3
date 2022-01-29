@@ -179,30 +179,69 @@ int main(int argc, char *argv[])
           //    CHILD process executes this
           //-------------------------------------------------
           case 0:
-                // 1. I/O Redirection using dup2 first
 
-
-                // 2. Execute command with exec()
+                // DEBUG
                 printf("  Child's pid = %d\n", getpid());
                 fflush(stdout);
 
-                // DEBUG
-                // printf("  Child will execute this process: %s\n", c->name);
-                // fflush(stdout);
-                // printf("    with args: ");
-                //       for (int i = 0; i < c->numargs; i++)
-                //       {
-                //         printf("%s ", c->args[i]);
-                //       }
-                //       printf("\n");
-                // fflush(stdout);
+                
+
+                // I/O Redirection using dup2
+                int result;
+                int fdin;
+                int fdout;
+
+                //-------------------------------------------
+                //    INPUT
+                //-------------------------------------------
+                if(c->hasInput) 
+                {
+                  // Open source file
+                  c->fdin = open(c->finpath, O_RDONLY);
+                  if(c->fdin == -1) {
+                    perror("source open()");
+                    exit(1);
+                  }
+
+                  printf("sourceFD == %d\n", c->fdin);
+
+
+                  // Redirect stdin to source file
+                  result = dup2(c->fdin, STDIN_FILENO);
+                  if (result == -1) { 
+                    perror("source dup2()"); 
+                    exit(2); 
+                  }
+                }
+
+                //-------------------------------------------
+                //    OUTPUT
+                //-------------------------------------------
+                if(c->hasOutput) 
+                {
+                  // Open source file
+                  c->fdout = open(c->foutpath, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+                  if(c->fdout == -1) {
+                    perror("target open()");
+                    exit(1);
+                  }
+
+                  printf("targetFD == %d\n", c->fdout);
+
+
+                  // Redirect stdout to target file
+                  result = dup2(c->fdout, STDOUT_FILENO);
+                  if (result == -1) { 
+                    perror("target dup2()"); 
+                    exit(2); 
+                  }
+                }
 
                 // // Replace current program with provided one
                 execvp(c->name, c->args);
 
-                // // Only returns if there is an error
+                // Only returns if there is an error
                 perror("execvp");
-                sleep(2);
                 exit(2);    // Be sure to exit Child process (not continue through rest of code)
                 break;
           

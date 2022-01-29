@@ -35,8 +35,8 @@ typedef struct command {
   char finpath[MAX_LINE_LENGTH];
   char foutname[MAX_FILE_LENGTH];
   char foutpath[MAX_LINE_LENGTH];
-  FILE * fsin;
-  FILE * fsout;
+  int fdin;
+  int fdout;
 
   bool hasInput;
   bool hasOutput;
@@ -130,8 +130,8 @@ void initCommand(Command * c)
   strcpy(c->foutpath, "/dev/null");
   strcpy(c->finpath, "/dev/null");
 
-  c->fsin = NULL;
-  c->fsout = NULL;
+  c->fdin = -1;
+  c->fdout = -1;
 
   c->hasInput = false;
   c->hasOutput = false;
@@ -219,7 +219,7 @@ void parseCommandInput(char * input, Command * c)
       }
 
       free(token);
-      
+
       // Get next token
       if(token != NULL) {
         token = strtok_r(NULL, " ", &saveptr);
@@ -326,8 +326,8 @@ void printCommand(Command * c)
   printf("  finpath: %s\n", c->finpath);
   printf("  foutname: %s\n", c->foutname);
   printf("  foutpath: %s\n", c->foutpath);
-  printf("  fsin: %p\n", c->fsin);
-  printf("  fsout: %p\n", c->fsin);
+  printf("  fsin: %d\n", c->fdin);
+  printf("  fsout: %d\n", c->fdin);
 
   printf("  hasInput: %d\n", c->hasInput);
   printf("  hasOutput: %d\n", c->hasOutput);
