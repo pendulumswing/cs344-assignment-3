@@ -94,13 +94,18 @@ int main(int argc, char *argv[])
         printf("BUILT-IN CMD: %s\n", c->name);
         // Change working directory to given
         
+        // Print CWD
         getcwd(cwd, MAX_LINE_LENGTH);
         printf("CWD: %s\n", cwd);
-        if(c->numargs == 0) {
+
+
+        if(c->numargs == 1) {
           chdir(getenv("HOME"));
         } else {
-          chdir(c->args[0]);
+          chdir(c->args[1]);
         }
+
+        // Print CWD
         getcwd(cwd, MAX_LINE_LENGTH);
         printf("CWD: %s\n", cwd);
 
