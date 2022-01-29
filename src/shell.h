@@ -121,6 +121,11 @@ void initCommand(Command * c)
   memset(c->finpath, '\0', MAX_LINE_LENGTH * sizeof(char));
   memset(c->foutname, '\0', MAX_FILE_LENGTH * sizeof(char));
   memset(c->foutpath, '\0', MAX_LINE_LENGTH * sizeof(char));
+  
+  // Default Linux directory to channel I/O streams when not specified
+  strcpy(c->foutpath, "/dev/null");
+  strcpy(c->finpath, "/dev/null");
+
   c->fsin = NULL;
   c->fsout = NULL;
 
