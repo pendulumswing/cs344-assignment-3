@@ -44,6 +44,8 @@ int main(int argc, char *argv[])
 
 
 
+
+
   do
   {
     // PROMPT for shell
@@ -124,63 +126,79 @@ int main(int argc, char *argv[])
         printf("  Parent's pid = %d\n", getpid());
         fflush(stdout);
 
-        // Create CHILD process
-        pid_t child = fork();
+        // Fork CHILD process
+        pid_t spawnPid = fork();
 
-        if(child == -1){
 
-          // Handle creation failure
-          perror("fork() failed!");
-          fflush(stdout);
-          exit(1);
-        } else if(child == 0){
+        // CHILD PID SWITCH
+ 
+
+        switch (spawnPid)
+        {
+
+          // FAILED
+          case -1:
+                // Handle creation failure
+                perror("fork() failed!");
+                fflush(stdout);
+                exit(1);
+                break;
+
 
           // CHILD process executes this
-          // 1. I/O Redirection using dup2 first
-          // 2. Execute command with exec()
+          case 0:
+                // 1. I/O Redirection using dup2 first
 
 
-          printf("  Child's pid = %d\n", getpid());
-          fflush(stdout);
-          printf("  Child will execute this process: %s\n", c->name);
-          fflush(stdout);
-          printf("    with args: ");
-                for (int i = 0; i < c->numargs; i++)
-                {
-                  printf("%s ", c->args[i]);
-                }
-                printf("\n");
-          fflush(stdout);
-          sleep(3);
-          exit(0);  // Be sure to exit Child process (not continue through rest of code)
+                // 2. Execute command with exec()
+                printf("  Child's pid = %d\n", getpid());
+                fflush(stdout);
+                printf("  Child will execute this process: %s\n", c->name);
+                fflush(stdout);
+                printf("    with args: ");
+                      for (int i = 0; i < c->numargs; i++)
+                      {
+                        printf("%s ", c->args[i]);
+                      }
+                      printf("\n");
+                fflush(stdout);
 
-        } else {
+                // // Replace current program with provided one
+                execvp(c->name, c->args);
 
+                // // Only returns if there is an error
+                perror("execvp");
+                sleep(2);
+                exit(2);    // Be sure to exit Child process (not continue through rest of code)
+                break;
+          
           // PARENT process executes this
-          pid_t childPid = waitpid(child, &childStatus, c->isBg ? WNOHANG : 0);  // Wait on child to finish
+          default:
+                // pid_t childPid = waitpid(spawnPid, &childStatus, c->isBg ? WNOHANG : 0);  // Wait on child to finish
+                spawnPid = waitpid(spawnPid, &childStatus, c->isBg ? WNOHANG : 0);  // Wait on child to finish
 
-          printf("  WAITPID returned value %d\n", childPid);
-          fflush(stdout);
+                printf("  WAITPID returned value %d\n", spawnPid);
+                fflush(stdout);
 
-          // Check STATUS of child process termination
-          if(WIFEXITED(childStatus)){
-            printf("  CHILD %d exited normally with status %d\n", childPid, WEXITSTATUS(childStatus));
-            fflush(stdout);
-          } else{
-            printf("  CHILD %d exited abnormally due to signal %d\n", childPid, WTERMSIG(childStatus));
-            fflush(stdout);
-          }
-          printf("PARENT is done waiting. The pid of child that terminated is %d\n", childPid);
-          fflush(stdout);
-        
+                // Check STATUS of child process termination
+                if(WIFEXITED(childStatus)){
+                  printf("  CHILD %d exited normally with status %d\n", spawnPid, WEXITSTATUS(childStatus));
+                  fflush(stdout);
+                } else{
+                  printf("  CHILD %d exited abnormally due to signal %d\n", spawnPid, WTERMSIG(childStatus));
+                  fflush(stdout);
+                }
+                printf("PARENT is done waiting. The pid of child that terminated is %d\n", spawnPid);
+                fflush(stdout);
+                break;
         }
+
         printf("The process with pid %d is returning from main\n", getpid());
         fflush(stdout);
       }
 
       c->print(c);
       c->free(c);
-
 
     }
   } while (strcmp(input, "exit") != 0);
