@@ -40,17 +40,18 @@ int main(int argc, char *argv[])
   printf("Ennironment Variables:\n");
   printf("  PID: %s\n", getenv("PID"));
   printf("  HOME: %s\n", getenv("HOME"));
-  // unsigned int pids[MAX_ARGS];    // To store running process PIDS
+
+  // Foreground / Background Modes
   bool allowbg = true;            // Toggle with SIGTSTP  (CTRL-Z)
   char * fgonlymessage = "Entering foreground-only mode (& is now ignored)\n"; // count = 50 chars
   char * fgonlyexitmessage = "Exiting foreground-only mode\n"; // count = 30 chars
+
 
   // PIDS - to store all child process ids
   Pids * fgpids = createPids();
   Pids * bgpids = createPids();
 
   int childStatus = 0;
-  int childPid = 0;
   pid_t spawnPid;
 
 
@@ -71,7 +72,7 @@ int main(int argc, char *argv[])
 
     // COMMENTS & BLANK LINES - Reprompt if found
     if(input[0] == '#' || inputlen == 0 || hasSpacesOnly(input)) {
-      printf("IGNORING Comments, blank lines or only spaces\n");
+      // printf("IGNORING Comments, blank lines or only spaces\n");  // DEBUG
     } 
     else 
     {
@@ -195,10 +196,11 @@ int main(int argc, char *argv[])
           //    CHILD process executes this
           //-------------------------------------------------
           case 0:
+              {
 
-                // DEBUG
-                printf("  Child's pid = %d\n", getpid());
-                fflush(stdout);
+                // // DEBUG
+                // printf("  Child's pid = %d\n", getpid());
+                // fflush(stdout);
 
                 
 
@@ -258,6 +260,7 @@ int main(int argc, char *argv[])
                 perror("execvp");
                 exit(2);    // Be sure to exit Child process (not continue through rest of code)
                 break;
+              }
           
 
           //-------------------------------------------------
