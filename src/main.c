@@ -46,7 +46,12 @@ int main(int argc, char *argv[])
   char * fgonlyexitmessage = "Exiting foreground-only mode\n"; // count = 30 chars
 
   // PIDS - to store all child process ids
-  Pids * pids = createPids();
+  Pids * fgpids = createPids();
+  Pids * bgpids = createPids();
+
+  int childStatus = 0;
+  int childPid = 0;
+  pid_t spawnPid;
 
 
   do
@@ -70,8 +75,8 @@ int main(int argc, char *argv[])
     } 
     else 
     {
-      printf("  PID: %s\n", pidstr);
-      printf("You entered: %s\n", input);
+      printf("  PPID: %s\n", pidstr);
+      // printf("You entered: %s\n", input);
 
       // CREATE command and PARSE input string into args.
       // Identify file streams and if process is to run in background.
@@ -81,6 +86,8 @@ int main(int argc, char *argv[])
       c->trimArgs(c);
 
 
+      // CHECK for background processes (iterate over list)
+      bgpids->check(bgpids);
       
 
       //----------------------------------------------------------------------------
@@ -101,7 +108,6 @@ int main(int argc, char *argv[])
 
 
 
-
       } 
 
       //-------------------------------------------------
@@ -110,12 +116,12 @@ int main(int argc, char *argv[])
       // If no given directory, change to HOME directory.
       //-------------------------------------------------
       else if(strcmp(c->name, "cd") == 0) {
-        printf("BUILT-IN CMD: %s\n", c->name);  // DEBUG
+        // printf("BUILT-IN CMD: %s\n", c->name);  // DEBUG
         
         
         // DEBUG: Print CWD
-        getcwd(cwd, MAX_LINE_LENGTH);
-        printf("CWD: %s\n", cwd);
+        // getcwd(cwd, MAX_LINE_LENGTH);
+        // printf("CWD: %s\n", cwd);
 
 
         if(c->numargs == 1) {
@@ -125,8 +131,8 @@ int main(int argc, char *argv[])
         }
 
         // DEBUG: Print CWD
-        getcwd(cwd, MAX_LINE_LENGTH);
-        printf("CWD: %s\n", cwd);
+        // getcwd(cwd, MAX_LINE_LENGTH);
+        // printf("CWD: %s\n", cwd);
 
       }
 
@@ -137,15 +143,19 @@ int main(int argc, char *argv[])
       //   b. Built-in commands do not count as foreground processes (should be ignored)
       //-------------------------------------------------
       else if(strcmp(c->name, "status") == 0) {
-        printf("BUILT-IN CMD: %s\n", c->name);
+        // printf("BUILT-IN CMD: %s\n", c->name);
 
         // TODO:
         // 1. Print exit status of terminating signal of the last foreground process
         //   a. If ran before any foreground command, then it should return exit status 0
         //   b. Built-in commands do not count as foreground processes (should be ignored)
-
-
-
+        if(WIFEXITED(childStatus)){
+          printf("  exit status %d\n", WEXITSTATUS(childStatus));
+          fflush(stdout);
+        } else{
+          printf("  terminated by signal %d\n", WTERMSIG(childStatus));
+          fflush(stdout);
+        }
 
 
       } 
@@ -157,14 +167,15 @@ int main(int argc, char *argv[])
       //----------------------------------------------------------------------------
       else {
 
-        int   childStatus;
-        printf("  Parent's pid = %d\n", getpid());  // DEBUG
-        fflush(stdout);
+        // int   childStatus;
+        // printf("  Parent's pid = %d\n", getpid());  // DEBUG
+        // fflush(stdout);
 
         //-------------------------------------------------
         // FORK child process
         //-------------------------------------------------
-        pid_t spawnPid = fork();
+        // TODO: Change this to use Pids array and store all pids
+        spawnPid = fork();
 
         switch (spawnPid)
         {
@@ -254,26 +265,39 @@ int main(int argc, char *argv[])
           //-------------------------------------------------
           default:
                 // pid_t childPid = waitpid(spawnPid, &childStatus, c->isBg ? WNOHANG : 0);  // Wait on child to finish
-                spawnPid = waitpid(spawnPid, &childStatus, c->isBg ? WNOHANG : 0);  // Wait on child to finish
-
-                printf("  WAITPID returned value %d\n", spawnPid);
-                fflush(stdout);
-
-                // Check STATUS of child process termination
-                if(WIFEXITED(childStatus)){
-                  printf("  CHILD %d exited normally with status %d\n", spawnPid, WEXITSTATUS(childStatus));
+                if(!c->isBg) {
+                  spawnPid = waitpid(spawnPid, &childStatus, 0);  // Wait on child to finish
+                } else {
+                  printf("background pid is %d\n", spawnPid);
                   fflush(stdout);
-                } else{
-                  printf("  CHILD %d exited abnormally due to signal %d\n", spawnPid, WTERMSIG(childStatus));
-                  fflush(stdout);
-                }
-                printf("PARENT is done waiting. The pid of child that terminated is %d\n", spawnPid);  // DEBUG
-                fflush(stdout);
+                  bgpids->add(bgpids, spawnPid);
+                  bgpids->print(bgpids);  // DEBUG
+                };
+
+
+                
+
+
+
+
+                // printf("  WAITPID returned value %d\n", spawnPid);
+                // fflush(stdout);
+
+                // // Check STATUS of child process termination
+                // if(WIFEXITED(childStatus)){
+                //   printf("  CHILD %d exited normally with status %d\n", spawnPid, WEXITSTATUS(childStatus));
+                //   fflush(stdout);
+                // } else{
+                //   printf("  CHILD %d exited abnormally due to signal %d\n", spawnPid, WTERMSIG(childStatus));
+                //   fflush(stdout);
+                // }
+                // printf("PARENT is done waiting. The pid of child that terminated is %d\n", spawnPid);  // DEBUG
+                // fflush(stdout);
                 break;
         }
 
-        printf("The process with pid %d is returning from main\n", getpid());  // DEBUG
-        fflush(stdout);
+        // printf("The process with pid %d is returning from main\n", getpid());  // DEBUG
+        // fflush(stdout);
       }
 
       // c->print(c);  // DEBUG
@@ -282,7 +306,8 @@ int main(int argc, char *argv[])
     }
   } while (strcmp(input, "exit") != 0);
 
-  pids->free(pids);
+  fgpids->free(fgpids);
+  bgpids->free(bgpids);
 
   return EXIT_SUCCESS;
 }

@@ -70,6 +70,7 @@ typedef struct pids {
 
   void (*add) (struct pids *, int);
   void (*remove) (struct pids *, int);
+  void (*check) (struct pids *);
   void (*print) (struct pids *);
   void (*free) (struct pids *);
 } Pids;
@@ -96,6 +97,7 @@ Pids * createPids();
 void initPids(Pids * p);
 void addPid(Pids * p, int value);
 void removePid(Pids * p, int value);
+void checkPids(Pids * p);
 void printPids(Pids * p);
 void freePids(Pids * p);
 char * expandVariable(char * input);
@@ -379,6 +381,7 @@ void initPids(Pids * p)
 
   p->add = &addPid;
   p->remove = &removePid;
+  p->check = &checkPids;
   p->print = &printPids;
   p->free = &freePids;
 }
@@ -431,13 +434,39 @@ void printPids(Pids * p)
   {
     printf("%d", p->pids[i]);
   }
+  printf("\n");
+}
+
+
+/*
+* Checks each pid in list for current status without waiting (WNOHANG)
+* Prints status of pids that finished
+*/
+void checkPids(Pids * p)
+{
+  int status = -1;
+  int childStatus;
+  for (int i = 0; i < p->numpids; i++)
+  {
+    status = waitpid(p->pids[i], &childStatus, WNOHANG);  // Immediately checks on child status
+    if(status != 0) {
+      printf("background pid %d is done: ", p->pids[i]);
+      if(WIFEXITED(childStatus)){
+          printf("exit status %d\n", WEXITSTATUS(childStatus));
+          fflush(stdout);
+        } else{
+          printf("terminated by signal %d\n", WTERMSIG(childStatus));
+          fflush(stdout);
+        }
+    }
+  }
 }
 
 
 
 
 /*
-* Frees allocated memory for a Command struct
+* Frees allocated memory for a Pids struct
 */
 void freePids(Pids * p)
 {
