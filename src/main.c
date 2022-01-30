@@ -40,10 +40,13 @@ int main(int argc, char *argv[])
   printf("Ennironment Variables:\n");
   printf("  PID: %s\n", getenv("PID"));
   printf("  HOME: %s\n", getenv("HOME"));
-  unsigned int pids[MAX_ARGS];    // To store running process PIDS
+  // unsigned int pids[MAX_ARGS];    // To store running process PIDS
   bool allowbg = true;            // Toggle with SIGTSTP  (CTRL-Z)
   char * fgonlymessage = "Entering foreground-only mode (& is now ignored)\n"; // count = 50 chars
   char * fgonlyexitmessage = "Exiting foreground-only mode\n"; // count = 30 chars
+
+  // PIDS - to store all child process ids
+  Pids * pids = createPids();
 
 
   do
@@ -77,6 +80,8 @@ int main(int argc, char *argv[])
       c->parseStreams(c);
       c->trimArgs(c);
 
+
+      
 
       //----------------------------------------------------------------------------
       //
@@ -188,8 +193,6 @@ int main(int argc, char *argv[])
 
                 // I/O Redirection using dup2
                 int result;
-                int fdin;
-                int fdout;
 
                 //-------------------------------------------
                 //    INPUT
@@ -264,20 +267,22 @@ int main(int argc, char *argv[])
                   printf("  CHILD %d exited abnormally due to signal %d\n", spawnPid, WTERMSIG(childStatus));
                   fflush(stdout);
                 }
-                printf("PARENT is done waiting. The pid of child that terminated is %d\n", spawnPid);
+                printf("PARENT is done waiting. The pid of child that terminated is %d\n", spawnPid);  // DEBUG
                 fflush(stdout);
                 break;
         }
 
-        printf("The process with pid %d is returning from main\n", getpid());
+        printf("The process with pid %d is returning from main\n", getpid());  // DEBUG
         fflush(stdout);
       }
 
-      c->print(c);  // DEBUG
+      // c->print(c);  // DEBUG
       c->free(c);
 
     }
   } while (strcmp(input, "exit") != 0);
+
+  pids->free(pids);
 
   return EXIT_SUCCESS;
 }

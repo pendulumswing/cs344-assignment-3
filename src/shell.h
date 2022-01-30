@@ -12,6 +12,7 @@
 #define MAX_LINE_LENGTH 2048
 #define MAX_FILE_LENGTH 256
 #define MAX_ARGS 512
+#define MAX_PIDS 512
 
 
 
@@ -63,6 +64,16 @@ typedef struct commandline {
 } CommandLine;
 
 
+typedef struct pids {
+  int numpids;
+  int pids[MAX_PIDS];
+
+  void (*add) (struct pids *, int);
+  void (*remove) (struct pids *, int);
+  void (*print) (struct pids *);
+  void (*free) (struct pids *);
+} Pids;
+
 
 
 /*******************************************************
@@ -81,6 +92,12 @@ void parseCommandStreams(Command * c);
 void trimCommandArgs(Command * c);
 void freeCommand(Command * c);
 void printCommand(Command * c);
+Pids * createPids();
+void initPids(Pids * p);
+void addPid(Pids * p, int value);
+void removePid(Pids * p, int value);
+void printPids(Pids * p);
+void freePids(Pids * p);
 char * expandVariable(char * input);
 char * substring(char * str, int pos, int len);
 void trimLeadingWhitespace(char * input);
@@ -106,6 +123,18 @@ Command * createCommand()
   return c;
 }
 
+
+/*
+* Creates pids struct and initializes it.
+* Returns the new struct.
+*/
+Pids * createPids()
+{
+  Pids * p = malloc(sizeof(p));
+  initPids(p);
+
+  return p;
+}
 
 
 /*
@@ -140,8 +169,8 @@ void initCommand(Command * c)
   c->parseInput = &parseCommandInput;
   c->parseStreams = &parseCommandStreams;
   c->trimArgs = &trimCommandArgs;
-  c->free = &freeCommand;
   c->print = &printCommand;
+  c->free = &freeCommand;
 }
 
 
@@ -336,6 +365,88 @@ void printCommand(Command * c)
 
   fflush(stdout);
 }
+
+
+
+
+/*
+* Initializes Pids struct
+*/
+void initPids(Pids * p)
+{
+  p->numpids = 0;
+  memset(p->pids, 0, MAX_PIDS);
+
+  p->add = &addPid;
+  p->remove = &removePid;
+  p->print = &printPids;
+  p->free = &freePids;
+}
+
+
+
+/*
+* Adds pid value to Pids struct
+*/
+void addPid(Pids * p, int value)
+{
+  p->pids[p->numpids] = value;
+  p->numpids++;
+}
+
+
+
+
+/*
+* Removes pid value from Pids struct
+*/
+void removePid(Pids * p, int value)
+{
+  bool found = false;
+  for (int i=0; i < p->numpids; i++)
+  {
+    int j = i + 1;
+
+    if(p->pids[i] == value){
+      if(j < p->numpids) {
+        p->pids[i] = p->pids[j];      
+      }
+    }
+  }
+
+  if(found) {
+    p->numpids--;
+  }
+}
+
+
+
+/*
+* Prints values of struct Pids
+*/
+void printPids(Pids * p)
+{
+  printf("PIDS: ");
+  for (int i = 0; i < p->numpids; i++)
+  {
+    printf("%d", p->pids[i]);
+  }
+}
+
+
+
+
+/*
+* Frees allocated memory for a Command struct
+*/
+void freePids(Pids * p)
+{
+  memset(p->pids, 0, MAX_PIDS);
+
+  free(p);
+  p = NULL;
+}
+
 
 
 
