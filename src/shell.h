@@ -17,15 +17,16 @@
 
 
 
+
 /*******************************************************
 *
 * STRUCTS
 *
 *******************************************************/
 
+
 /*
-* struct COMMAND
-* To hold details for individual command or argument(s)
+* STRUCT COMMAND - To hold details for individual command or argument(s)
 */
 typedef struct command {
 
@@ -54,17 +55,8 @@ typedef struct command {
 
 
 /*
-* struct COMMANDLINE
-* To hold all commands for a given line
+* STRUCT PIDS - to hold array of Pids and functions to handle array
 */
-typedef struct commandline {
-
-  char input[MAX_LINE_LENGTH];
-  struct command * commands[MAX_ARGS];
-
-} CommandLine;
-
-
 typedef struct pids {
   int numpids;
   int pids[MAX_PIDS];
@@ -79,12 +71,12 @@ typedef struct pids {
 
 
 
+
 /*******************************************************
 *
 * Function PROTOTYPES
 *
 *******************************************************/
-
 void shellPrompt();
 void getInput(char * input, int size);
 bool hasSpacesOnly(const char * input);
@@ -109,13 +101,12 @@ void trimLeadingWhitespace(char * input);
 
 
 
-
-
 /*******************************************************
 *
 * Function DEFINITIONS
 *
 *******************************************************/
+
 /*
 * Creates command struct and initializes it.
 * Returns the new struct.
@@ -467,7 +458,7 @@ void checkPids(Pids * p)
           fflush(stdout);
         }
       p->remove(p, p->pids[i]);
-      p->print(p);
+      // p->print(p);  // DEBUG
     }
   }
 }
@@ -487,9 +478,9 @@ void killPids(Pids * p)
         perror("kill");
         exit(EXIT_FAILURE);
     }
-    printf("Killed child process: %d\n", p->pids[i]);
+    printf("Killed child process: %d\n", p->pids[i]);  // DEBUG
     removePid(p, p->pids[i]);
-    p->print(p);
+    // p->print(p);  // DEBUG
   }
 }
 
@@ -508,16 +499,6 @@ void freePids(Pids * p)
 }
 
 
-
-
-/*
-* Initializes CommandLine struct and clears memory
-*/
-void initCommandLine(CommandLine * cl)
-{
-  memset(cl->input, '\0', MAX_LINE_LENGTH * sizeof(char));
-  // memset(cl->commands, '\0', MAX_ARGS * sizeof(Command));
-}
 
 
 /*
