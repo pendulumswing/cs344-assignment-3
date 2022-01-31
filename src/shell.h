@@ -415,8 +415,11 @@ void removePid(Pids * p, int value)
     int j = i + 1;
 
     if(p->pids[i] == value){
+      found = true;
       if(j < p->numpids) {
         p->pids[i] = p->pids[j];      
+      } else {
+        p->pids[i] = 0;
       }
     }
   }
@@ -433,13 +436,14 @@ void removePid(Pids * p, int value)
 */
 void printPids(Pids * p)
 {
-  printf("PIDS: ");
+  printf("PIDS: \n");
   for (int i = 0; i < p->numpids; i++)
   {
     printf("%d\n", p->pids[i]);
   }
   printf("\n");
 }
+
 
 
 /*
@@ -463,9 +467,11 @@ void checkPids(Pids * p)
           fflush(stdout);
         }
       p->remove(p, p->pids[i]);
+      p->print(p);
     }
   }
 }
+
 
 
 /*
