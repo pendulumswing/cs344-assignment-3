@@ -85,7 +85,7 @@ int main(int argc, char *argv[])
     } 
     else 
     {
-      printf("  PPID: %s\n", pidstr);
+      // printf("  PPID: %s\n", pidstr);  // DEBUG
       // printf("You entered: %s\n", input);
 
       // CREATE command and PARSE input string into args.
@@ -207,7 +207,7 @@ int main(int argc, char *argv[])
                     exit(1);
                   }
 
-                  printf("sourceFD == %d\n", c->fdin);
+                  // printf("sourceFD == %d\n", c->fdin);  // DEBUG
 
 
                   // Redirect stdin to source file
@@ -230,7 +230,7 @@ int main(int argc, char *argv[])
                     exit(1);
                   }
 
-                  printf("targetFD == %d\n", c->fdout);
+                  // printf("targetFD == %d\n", c->fdout);  // DEBUG
 
 
                   // Redirect stdout to target file
@@ -269,7 +269,7 @@ int main(int argc, char *argv[])
                   printf("background pid is %d\n", spawnPid);
                   fflush(stdout);
                   bgpids->add(bgpids, spawnPid);
-                  bgpids->print(bgpids);  // DEBUG
+                  // bgpids->print(bgpids);  // DEBUG
                 };
                 break;
         }
