@@ -80,6 +80,7 @@ typedef struct pids {
 void shellPrompt();
 void getInput(char * input, int size);
 bool hasSpacesOnly(const char * input);
+
 Command * createCommand();
 void initCommand(Command * c);
 void parseCommandInput(char * input, Command * c);
@@ -87,6 +88,7 @@ void parseCommandStreams(Command * c);
 void trimCommandArgs(Command * c);
 void freeCommand(Command * c);
 void printCommand(Command * c);
+
 Pids * createPids();
 void initPids(Pids * p);
 void addPid(Pids * p, int value);
@@ -95,6 +97,7 @@ void checkPids(Pids * p);
 void killPids(Pids * p);
 void printPids(Pids * p);
 void freePids(Pids * p);
+
 char * expandVariable(char * input);
 char * substring(char * str, int pos, int len);
 void trimLeadingWhitespace(char * input);
@@ -472,6 +475,8 @@ void killPids(Pids * p)
 {
   for (int i = p->numpids - 1; i >= 0; i--)
   {
+    // TODO: Check status to see if running first (waitpid())
+
     // SOURCE: https://bit.ly/3gcmbQY, Date: 1/30/22, Adopted
     int ret = kill(p->pids[i], SIGKILL);
     if (ret == -1) {

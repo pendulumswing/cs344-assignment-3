@@ -2,31 +2,32 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "movie.h"
 #include "dir.h"
 #include "shell.h"
-
-#define PREFIX "movies_"
-#define EXT_UP "CSV"
-#define EXT_LOW "csv"
-
 
 /*
 *   Program Title: Assignment 3: smallsh
 *   Author: Jason Brown
 *   ONID: brownja4
-*   Date: 01/29/2022
+*   Date: 01/30/2022
 */
 
 /*
-*   Small shell program with limited functionality similar to BASH.
+*   Small shell program similar to BASH, with limited functionality.
+
 *   Compile the program as follows:
 *       gcc --std=gnu99 -o smallsh smallsh.c
+*
+*   This program will:   
+*   1. Provide a prompt for running commands
+*   2. Handle blank lines and comments, which are lines beginning with the `#` character
+*   3. Provide expansion for the variable $$
+*   4. Execute 3 commands `exit`, `cd`, and `status` via code built into the shell
+*   5. Execute other commands by creating new processes using a function from the `exec` family of functions
+*   6. Support input and output redirection
+*   7. Support running commands in foreground and background processes
+*   8. Implement custom handlers for 2 signals, SIGINT and SIGTSTP
 */
-
-
-
-
 
 int main(int argc, char *argv[])
 {
@@ -37,14 +38,17 @@ int main(int argc, char *argv[])
   memset(cwd, '\0', MAX_LINE_LENGTH * sizeof(char));
 
 
-  // Get smallsh PID, as int and string
+  // PARENT PID - as int and string
   int pid = getpid();
   char pidstr[12];
-  sprintf(pidstr, "%d", pid);  // Convert pid to string
+  sprintf(pidstr, "%d", pid);
   setenv("PID", pidstr, 1);
-  printf("Ennironment Variables:\n");
-  printf("  PID: %s\n", getenv("PID"));
-  printf("  HOME: %s\n", getenv("HOME"));
+
+  // // DEBUG
+  // printf("Ennironment Variables:\n");
+  // printf("  PID: %s\n", getenv("PID"));
+  // printf("  HOME: %s\n", getenv("HOME"));
+
 
   // Foreground / Background Modes
   bool allowbg = true;            // Toggle with SIGTSTP  (CTRL-Z)
@@ -62,7 +66,7 @@ int main(int argc, char *argv[])
 
   do
   {
-    // PROMPT for shell
+    // PROMPT
     shellPrompt();
 
 
@@ -85,7 +89,6 @@ int main(int argc, char *argv[])
       // printf("You entered: %s\n", input);
 
       // CREATE command and PARSE input string into args.
-      // Identify file streams and if process is to run in background.
       Command * c = createCommand();
       c->parseInput(input, c);
       c->parseStreams(c);
@@ -108,11 +111,9 @@ int main(int argc, char *argv[])
       // Then exit parent
       //-------------------------------------------------
       if(strcmp(c->name, "exit") == 0) {
-        printf("BUILT-IN CMD: %s\n", c->name);
 
-        // TODO: Terminate all child processes/jobs before parent
+        // Terminate all child processes/jobs before parent
         bgpids->kill(bgpids);
-
 
       } 
 
@@ -122,8 +123,6 @@ int main(int argc, char *argv[])
       // If no given directory, change to HOME directory.
       //-------------------------------------------------
       else if(strcmp(c->name, "cd") == 0) {
-        // printf("BUILT-IN CMD: %s\n", c->name);  // DEBUG
-        
         
         // DEBUG: Print CWD
         // getcwd(cwd, MAX_LINE_LENGTH);
@@ -149,9 +148,7 @@ int main(int argc, char *argv[])
       //   b. Built-in commands do not count as foreground processes (should be ignored)
       //-------------------------------------------------
       else if(strcmp(c->name, "status") == 0) {
-        // printf("BUILT-IN CMD: %s\n", c->name);
 
-        // TODO:
         // 1. Print exit status of terminating signal of the last foreground process
         //   a. If ran before any foreground command, then it should return exit status 0
         //   b. Built-in commands do not count as foreground processes (should be ignored)
@@ -163,7 +160,6 @@ int main(int argc, char *argv[])
           fflush(stdout);
         }
 
-
       } 
       
       //----------------------------------------------------------------------------
@@ -173,14 +169,9 @@ int main(int argc, char *argv[])
       //----------------------------------------------------------------------------
       else {
 
-        // int   childStatus;
-        // printf("  Parent's pid = %d\n", getpid());  // DEBUG
-        // fflush(stdout);
-
         //-------------------------------------------------
         // FORK child process
         //-------------------------------------------------
-        // TODO: Change this to use Pids array and store all pids
         spawnPid = fork();
 
         switch (spawnPid)
@@ -190,7 +181,7 @@ int main(int argc, char *argv[])
           //    FAILED
           //-------------------------------------------------
           case -1:
-                // Handle creation failure
+          
                 perror("fork() failed!");
                 fflush(stdout);
                 exit(1);
@@ -198,22 +189,14 @@ int main(int argc, char *argv[])
 
 
           //-------------------------------------------------
-          //    CHILD process executes this
+          //    CHILD Process
           //-------------------------------------------------
           case 0:
               {
-
-                // // DEBUG
-                // printf("  Child's pid = %d\n", getpid());
-                // fflush(stdout);
-
-                
-
-                // I/O Redirection using dup2
                 int result;
 
                 //-------------------------------------------
-                //    INPUT
+                //    INPUT Stream
                 //-------------------------------------------
                 if(c->hasInput) 
                 {
@@ -236,7 +219,7 @@ int main(int argc, char *argv[])
                 }
 
                 //-------------------------------------------
-                //    OUTPUT
+                //    OUTPUT Stream
                 //-------------------------------------------
                 if(c->hasOutput) 
                 {
@@ -258,57 +241,39 @@ int main(int argc, char *argv[])
                   }
                 }
 
-                // // Replace current program with provided one
+                //-------------------------------------------
+                //    EXECUTE - Replace current program with provided one
+                //-------------------------------------------
                 execvp(c->name, c->args);
 
-                // Only returns if there is an error
-                perror("execvp");
-                exit(2);    // Be sure to exit Child process (not continue through rest of code)
+                
+                perror("execvp");  // Only returns to this code if there is an error
+                exit(2);           // Exit Child process (i.e. - don't continue through rest of code)
                 break;
               }
           
 
           //-------------------------------------------------
-          //    PARENT process executes this
+          //    PARENT Process
           //-------------------------------------------------
           default:
                 // pid_t childPid = waitpid(spawnPid, &childStatus, c->isBg ? WNOHANG : 0);  // Wait on child to finish
+
+                // FOREGROUND Process
                 if(!c->isBg) {
                   spawnPid = waitpid(spawnPid, &childStatus, 0);  // Wait on child to finish
-                } else {
+                } 
+                
+                // BACKGROUND Process
+                else {
                   printf("background pid is %d\n", spawnPid);
                   fflush(stdout);
                   bgpids->add(bgpids, spawnPid);
                   bgpids->print(bgpids);  // DEBUG
                 };
-
-
-                
-
-
-
-
-                // printf("  WAITPID returned value %d\n", spawnPid);
-                // fflush(stdout);
-
-                // // Check STATUS of child process termination
-                // if(WIFEXITED(childStatus)){
-                //   printf("  CHILD %d exited normally with status %d\n", spawnPid, WEXITSTATUS(childStatus));
-                //   fflush(stdout);
-                // } else{
-                //   printf("  CHILD %d exited abnormally due to signal %d\n", spawnPid, WTERMSIG(childStatus));
-                //   fflush(stdout);
-                // }
-                // printf("PARENT is done waiting. The pid of child that terminated is %d\n", spawnPid);  // DEBUG
-                // fflush(stdout);
                 break;
         }
-
-        // printf("The process with pid %d is returning from main\n", getpid());  // DEBUG
-        // fflush(stdout);
       }
-
-      // c->print(c);  // DEBUG
       c->free(c);
 
     }
