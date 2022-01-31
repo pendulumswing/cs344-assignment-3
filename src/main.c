@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
 
 
   // PIDS - to store all child process ids
-  Pids * fgpids = createPids();
+  // Pids * fgpids = createPids();
   Pids * bgpids = createPids();
 
   int childStatus = 0;
@@ -314,7 +314,7 @@ int main(int argc, char *argv[])
     }
   } while (strcmp(input, "exit") != 0);
 
-  fgpids->free(fgpids);
+  // fgpids->free(fgpids);
   bgpids->free(bgpids);
 
   return EXIT_SUCCESS;

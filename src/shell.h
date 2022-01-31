@@ -135,7 +135,7 @@ Command * createCommand()
 */
 Pids * createPids()
 {
-  Pids * p = malloc(sizeof(p));
+  Pids * p = malloc(sizeof(Pids));
   initPids(p);
 
   return p;
@@ -436,7 +436,7 @@ void printPids(Pids * p)
   printf("PIDS: ");
   for (int i = 0; i < p->numpids; i++)
   {
-    printf("%d", p->pids[i]);
+    printf("%d\n", p->pids[i]);
   }
   printf("\n");
 }
@@ -462,6 +462,7 @@ void checkPids(Pids * p)
           printf("terminated by signal %d\n", WTERMSIG(childStatus));
           fflush(stdout);
         }
+      p->remove(p, p->pids[i]);
     }
   }
 }
@@ -472,15 +473,17 @@ void checkPids(Pids * p)
 */
 void killPids(Pids * p)
 {
-  for (int i = 0; i < p->numpids; i++)
+  for (int i = p->numpids - 1; i >= 0; i--)
   {
     // SOURCE: https://bit.ly/3gcmbQY, Date: 1/30/22, Adopted
     int ret = kill(p->pids[i], SIGKILL);
-    printf("Killed child process: %d\n", p->pids[i]);
     if (ret == -1) {
         perror("kill");
         exit(EXIT_FAILURE);
     }
+    printf("Killed child process: %d\n", p->pids[i]);
+    removePid(p, p->pids[i]);
+    p->print(p);
   }
 }
 
@@ -492,7 +495,7 @@ void killPids(Pids * p)
 */
 void freePids(Pids * p)
 {
-  memset(p->pids, 0, MAX_PIDS);
+  // memset(p->pids, 0, MAX_PIDS);
 
   free(p);
   p = NULL;
