@@ -66,6 +66,9 @@ int main(int argc, char *argv[])
 
   do
   {
+    // CHECK for background processes (iterate over list)
+    bgpids->check(bgpids);
+
     // PROMPT
     shellPrompt();
 
@@ -95,8 +98,7 @@ int main(int argc, char *argv[])
       c->trimArgs(c);
 
 
-      // CHECK for background processes (iterate over list)
-      bgpids->check(bgpids);
+      
       
 
       //----------------------------------------------------------------------------
