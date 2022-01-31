@@ -23,6 +23,11 @@
 *   Compile the program as follows:
 *       gcc --std=gnu99 -o smallsh smallsh.c
 */
+
+
+
+
+
 int main(int argc, char *argv[])
 {
 
@@ -106,7 +111,7 @@ int main(int argc, char *argv[])
         printf("BUILT-IN CMD: %s\n", c->name);
 
         // TODO: Terminate all child processes/jobs before parent
-
+        bgpids->kill(bgpids);
 
 
       } 

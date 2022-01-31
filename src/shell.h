@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <signal.h>
 #include <sys/types.h>
 #include <sys/wait.h>    // for waitpid
 
@@ -71,6 +72,7 @@ typedef struct pids {
   void (*add) (struct pids *, int);
   void (*remove) (struct pids *, int);
   void (*check) (struct pids *);
+  void (*kill) (struct pids *);
   void (*print) (struct pids *);
   void (*free) (struct pids *);
 } Pids;
@@ -98,6 +100,7 @@ void initPids(Pids * p);
 void addPid(Pids * p, int value);
 void removePid(Pids * p, int value);
 void checkPids(Pids * p);
+void killPids(Pids * p);
 void printPids(Pids * p);
 void freePids(Pids * p);
 char * expandVariable(char * input);
@@ -382,6 +385,7 @@ void initPids(Pids * p)
   p->add = &addPid;
   p->remove = &removePid;
   p->check = &checkPids;
+  p->kill = &killPids;
   p->print = &printPids;
   p->free = &freePids;
 }
@@ -439,7 +443,7 @@ void printPids(Pids * p)
 
 
 /*
-* Checks each pid in list for current status without waiting (WNOHANG)
+* Checks each pid in Pids array for current status without waiting (WNOHANG)
 * Prints status of pids that finished
 */
 void checkPids(Pids * p)
@@ -458,6 +462,24 @@ void checkPids(Pids * p)
           printf("terminated by signal %d\n", WTERMSIG(childStatus));
           fflush(stdout);
         }
+    }
+  }
+}
+
+
+/*
+* Kills each pid in Pids array
+*/
+void killPids(Pids * p)
+{
+  for (int i = 0; i < p->numpids; i++)
+  {
+    // SOURCE: https://bit.ly/3gcmbQY, Date: 1/30/22, Adopted
+    int ret = kill(p->pids[i], SIGKILL);
+    printf("Killed child process: %d\n", p->pids[i]);
+    if (ret == -1) {
+        perror("kill");
+        exit(EXIT_FAILURE);
     }
   }
 }
