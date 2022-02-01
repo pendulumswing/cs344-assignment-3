@@ -528,10 +528,17 @@ void getInputFgets(char * input, int size)
   input[strcspn(input, "\n")] = '\0';  // Remove newline SOURCE: https://bit.ly/3fyCbwz, Date 1/18/22, Adopted
 }
 
+
+
+/*
+* Takes a char array and size as input, Sets content to all '\0',
+* gets user input using getline, and strips the newline character from the array.
+* Also clears errors for stdin if interrupted during getline operation.
+*/
 void getInput(char * input, int size)
 {
   int numChars;
-  size_t len = MAX_LINE_LENGTH;
+  size_t len = (size_t)size;
   memset(input, '\0', size * sizeof(char));
   numChars = getline(&input, &len, stdin);
   if(numChars == -1) {
