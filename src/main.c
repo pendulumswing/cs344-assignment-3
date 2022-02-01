@@ -43,12 +43,12 @@ static bool allowbg = true;
 */
 void handle_SIGTSTP(int signo)
 {
-  char * fgonlymessage = "Entering foreground-only mode (& is now ignored)\n"; // count = 50 chars
-  char * fgonlyexitmessage = "Exiting foreground-only mode\n"; // count = 30 chars
+  char * fgonlymessage = "\nEntering foreground-only mode (& is now ignored)\n"; // count = 51 chars
+  char * fgonlyexitmessage = "\nExiting foreground-only mode\n"; // count = 31 chars
   if(allowbg) {
-    write(STDOUT_FILENO, fgonlymessage, 50);
+    write(STDOUT_FILENO, fgonlymessage, 51);
   } else {
-    write(STDOUT_FILENO, fgonlyexitmessage, 30);
+    write(STDOUT_FILENO, fgonlyexitmessage, 31);
   }
   allowbg = !allowbg;
 };
@@ -309,17 +309,17 @@ int main(int argc, char *argv[])
           default:
                 // pid_t childPid = waitpid(spawnPid, &childStatus, c->isBg ? WNOHANG : 0);  // Wait on child to finish
 
-                // FOREGROUND Process
-                if(!c->isBg) {
-                  spawnPid = waitpid(spawnPid, &childStatus, 0);  // Wait on child to finish
-                } 
-                
                 // BACKGROUND Process
-                else {
+                if(c->isBg && allowbg) {
                   printf("background pid is %d\n", spawnPid);
                   fflush(stdout);
                   bgpids->add(bgpids, spawnPid);
                   // bgpids->print(bgpids);  // DEBUG
+                } 
+                
+                // FOREGROUND Process
+                else {
+                  spawnPid = waitpid(spawnPid, &childStatus, 0);  // Wait on child to finish
                 };
                 break;
         }
