@@ -29,6 +29,36 @@
 *   8. Implement custom handlers for 2 signals, SIGINT and SIGTSTP
 */
 
+
+
+// GLOBAL Variables
+static bool allowbg = true;
+
+
+/*
+* Signal handler for SIGTSTP (Control-Z)
+* Toggles allowbg bool and prints message to stdout.
+* Use "kill -SIGTSTP $$" at prompt to test (Using Control-Z
+* will kill the smallsh process as well).
+*/
+void handle_SIGTSTP(int signo)
+{
+  char * fgonlymessage = "Entering foreground-only mode (& is now ignored)\n"; // count = 50 chars
+  char * fgonlyexitmessage = "Exiting foreground-only mode\n"; // count = 30 chars
+  if(allowbg) {
+    write(STDOUT_FILENO, fgonlymessage, 50);
+  } else {
+    write(STDOUT_FILENO, fgonlyexitmessage, 30);
+  }
+  allowbg = !allowbg;
+};
+
+
+
+
+/*
+* MAIN Functino for program entry point.
+*/
 int main(int argc, char *argv[])
 {
 
@@ -36,6 +66,29 @@ int main(int argc, char *argv[])
   int inputlen = 0;
   char cwd[MAX_LINE_LENGTH];
   memset(cwd, '\0', MAX_LINE_LENGTH * sizeof(char));
+
+
+  // Initialize sigaction structs
+  struct sigaction SIGTSTP_action = {0}, ignore_action = {0};
+
+  // Fill out the SIGINT_action struct
+  // Register handle_SIGINT as the signal handler
+  SIGTSTP_action.sa_handler = handle_SIGTSTP;
+  // Block all catchable signals while handle_SIGINT is running
+  sigfillset(&SIGTSTP_action.sa_mask);
+  // No flags set
+  SIGTSTP_action.sa_flags = 0;
+  sigaction(SIGTSTP, &SIGTSTP_action, NULL);
+
+
+  // The ignore_action struct as SIG_IGN as its signal handler
+  ignore_action.sa_handler = SIG_IGN;
+
+  // Register the ignore_action as the handler for SIGTERM, SIGHUP, SIGQUIT.
+  // So all three of these signals will be ignored.
+  sigaction(SIGTERM, &ignore_action, NULL);
+  sigaction(SIGHUP, &ignore_action, NULL);
+  sigaction(SIGQUIT, &ignore_action, NULL);
 
 
   // PARENT PID - as int and string
@@ -51,12 +104,6 @@ int main(int argc, char *argv[])
   // printf("  HOME: %s\n", getenv("HOME"));
 
 
-  // Foreground / Background Modes
-  bool allowbg = true;            // Toggle with SIGTSTP  (CTRL-Z)
-  char * fgonlymessage = "Entering foreground-only mode (& is now ignored)\n"; // count = 50 chars
-  char * fgonlyexitmessage = "Exiting foreground-only mode\n"; // count = 30 chars
-
-
   // PIDS - to store all child process ids
   // Pids * fgpids = createPids();
   Pids * bgpids = createPids();
@@ -70,17 +117,17 @@ int main(int argc, char *argv[])
     // CHECK for background processes (iterate over list)
     bgpids->check(bgpids);
 
+
     // PROMPT
     shellPrompt();
 
 
     // GET user command string
-    // getInputFgets(input, MAX_LINE_LENGTH);
     getInput(input, MAX_LINE_LENGTH);
     inputlen = strlen(input);
 
 
-    // LEADING WHITESPACE - Check for leading whitespace and trim if necessary
+    // TRIM LEADING WHITESPACE - Check for leading whitespace and trim if necessary
     trimLeadingWhitespace(*&input);
 
 
@@ -100,7 +147,6 @@ int main(int argc, char *argv[])
       c->trimArgs(c);
 
 
-      
       
 
       //----------------------------------------------------------------------------
