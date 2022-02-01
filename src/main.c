@@ -252,7 +252,7 @@ int main(int argc, char *argv[])
 
                 
                 perror("execvp");  // Only returns to this code if there is an error
-                exit(2);           // Exit Child process (i.e. - don't continue through rest of code)
+                _exit(2);           // Exit Child process (i.e. - don't continue through rest of code)
                 break;
               }
           
