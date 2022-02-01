@@ -44,6 +44,7 @@ int main(int argc, char *argv[])
   sprintf(pidstr, "%d", pid);
   setenv("PID", pidstr, 1);
 
+
   // // DEBUG
   // printf("Ennironment Variables:\n");
   // printf("  PID: %s\n", getenv("PID"));
@@ -74,6 +75,7 @@ int main(int argc, char *argv[])
 
 
     // GET user command string
+    // getInputFgets(input, MAX_LINE_LENGTH);
     getInput(input, MAX_LINE_LENGTH);
     inputlen = strlen(input);
 

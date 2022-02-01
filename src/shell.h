@@ -78,7 +78,8 @@ typedef struct pids {
 *
 *******************************************************/
 void shellPrompt();
-void getInput(char * input, int size);
+void getInputFgets(char * input, int size);  // use with fgets
+void getInput(char * input, int size);       // Use with getline
 bool hasSpacesOnly(const char * input);
 
 Command * createCommand();
@@ -520,11 +521,20 @@ void shellPrompt()
 * Takes a char array and size as input, Sets content to all '\0',
 * gets user input using fgets, and strips the newline character from the array.
 */
-void getInput(char * input, int size)
+void getInputFgets(char * input, int size)
 {
   memset(input, '\0', size * sizeof(char));
   fgets(input, size, stdin);
   input[strcspn(input, "\n")] = '\0';  // Remove newline SOURCE: https://bit.ly/3fyCbwz, Date 1/18/22, Adopted
+}
+
+void getInput(char * input, int size)
+{
+  size_t len = MAX_LINE_LENGTH;
+  memset(input, '\0', size * sizeof(char));
+  getline(&input, &len, stdin);
+  input[strcspn(input, "\n")] = '\0';  // Remove newline SOURCE: https://bit.ly/3fyCbwz, Date 1/18/22, Adopted
+  printf("input: %s\n", input);
 }
 
 
