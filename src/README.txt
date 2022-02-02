@@ -1,4 +1,4 @@
-Assigment 2: Files & Directories
+Assignment 3: smallsh
 
 This program will:
 
@@ -14,18 +14,25 @@ This program will:
 
 Compile:
 Two methods to compile source code are provided below. 
-The executable will be named `smallsh` and can be exectuted with `./smallsh`
+The executable will be named `smallsh` and can be 
+exectuted with `./smallsh`. 
 
-
-Command line:
+Compile from the command line with:
 gcc --std=gnu99 -g -Wall -o smallsh main.c
 
 
-Using included Makefile:
+Using Makefile:
 make         // build executable
 make run     // build and run executable
 make clean   // remove object files and executable
 
 
 Run Test Script
+Included with the program is a test script called `p3testscript`. 
+Running this will produce a file with test results.
+
+First, make sure the file can execute by running:
+chmod +x p3testscript
+
+Then run with:
 ./p3testscript > mytestresults 2>&1 
