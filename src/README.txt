@@ -25,3 +25,7 @@ Using included Makefile:
 make         // build executable
 make run     // build and run executable
 make clean   // remove object files and executable
+
+
+Run Test Script
+./p3testscript > mytestresults 2>&1 
