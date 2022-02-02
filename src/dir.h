@@ -1,8 +1,10 @@
 #ifndef DIR_H
 #define DIR_H
 
-#include "movie.h"
+// #include "movie.h"
 #include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 #include <time.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -15,7 +17,7 @@
 #define RANDMAX 99999
 #define RANDMIN 0
 #define ONID "brownja4"
-#define FILEBASE "movies"
+#define FILEBASE "file"
 
 
 typedef struct fileinfo {
@@ -146,120 +148,6 @@ void makeRandomDir(char * newDir)
   sprintf(rand, "%d", getRandomNum());  // SOURCE: https://bit.ly/3tU36vh, Date: 1/18/22, Adopted
   strcat(newDir, rand);
   mkdir(newDir, 00750);
-}
-
-
-
-/*
-* Parses a MovieList and creates new .txt files for each year, in the format YYYY.txt
-* where YYYY is the year. Creates files in a given directory path.
-* Valid year range is MIN_YEAR to MAX_YEAR
-* Each file will contain the title for each movie in that year, one per line
-*/
-void createFiles(MovieList * list, char * directoryPath)
-{
-  char * dirPath = directoryPath;  // Make a local copy of dirPath. The original 
-                                   // was getting overwritten on flip for some reason
-  char yearNum[5];
-  int fd;
-  char fileName[MAX_FILENAME_SIZE];
-  char filePath[MAX_FILENAME_SIZE * 2];
-  memset(fileName, '\0', MAX_FILENAME_SIZE * sizeof(char));
-  memset(filePath, '\0', MAX_FILENAME_SIZE * 2 * sizeof(char));
-  Movie  *movie = NULL;  // Pointer to fron of list
-
-  // Iterate over list for each year
-  // Create a file if first occurance of year, 
-  // else open file and write to it
-  for (int year = MIN_YEAR; year < MAX_YEAR; year++)
-  {
-    movie = list->front;
-
-    do
-    {
-      if(movie->year == year)
-      {
-        if(filePath[0] == '\0')  // File not created yet
-        {
-          // Set file path based on year
-          sprintf(yearNum, "%d", year);  // Convert year to string
-          strcpy(filePath, dirPath);
-          strcat(filePath, "/");
-          strcat(filePath, yearNum);
-          strcat(filePath, ".txt");
-
-          // Create File and Open...
-          fd = open(filePath, O_RDWR | O_CREAT | O_TRUNC, 0640);
-          if (fd == -1){
-            printf("open() failed on \"%s\"\n", filePath);
-            perror("Error");
-            exit(1);
-          }
-        } else {
-          // ...Otherwise Open Existing file
-          fd = open(filePath, O_RDWR | O_APPEND );
-          if (fd == -1){
-            printf("open() failed on \"%s\"\n", filePath);
-            perror("Error");
-            exit(1);
-          }
-        }
-
-        // Write Title to file
-        char message[strlen(movie->title) + 1];
-        strcpy(message, movie->title);
-        strcat(message, "\n");
-        int howMany = write(fd, message, strlen(message));
-        printf("wrote %d bytes to the file\n", howMany);
-
-        close(fd);
-      }
-
-      // Go to next node in list
-      movie = movie->next;
-
-    } while (movie->next != NULL);
-
-
-    // Reset filePath and fd
-    fd = -1;
-    memset(filePath, '\0', MAX_FILENAME_SIZE * 2 * sizeof(char));
-  }
-}
-
-
-/*
-* Processes CSV file into MovieList
-* Creates a new directory, then creates files for each year within that directory,
-* one for each year that occurs in the MovieList. The new files contain the titles
-* of each movie for that year, one per line.
-*/
-void processFile(char * filename) {
-
-  // 1. Process File
-  printf("Now processing the chosen file named %s\n", filename);
-  MovieList  *list = processFileToList(filename);
-
-
-  // 2. Create Directory
-  char dirName[MAX_FILENAME_SIZE];
-  char dirPath[MAX_FILENAME_SIZE * 2];
-  memset(dirPath, '\0', MAX_FILENAME_SIZE * 2 * sizeof(char));
-  makeRandomDir(dirName);
-  printf("Created directory with name %s\n", dirName);
-
-
-  // 3. Create Directory Path
-  strcat(dirPath, "./");
-  strcat(dirPath, dirName);
-
-  
-  // 4. Write files to directory
-  createFiles(list, dirPath);
-
-  
-  // 5. Free list memory
-  freeMovieLinkedList(list);
 }
 
 
