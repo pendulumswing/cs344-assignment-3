@@ -2,8 +2,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "dir.h"
 #include "shell.h"
+
+#include <stdlib.h>
+#include <time.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <sys/wait.h>
+#include <dirent.h>
+#include <unistd.h>
+#include <sys/time.h>  // SOURCE: https://bit.ly/3tBzToE, Date: 1/17/22
 
 /*
 *   Program Title: Assignment 3: smallsh
@@ -32,11 +40,11 @@
 
 
 // GLOBAL Variables
-static bool allowbg = true;
+volatile static bool allowbg = true;
 
 
 /*
-* Signal handler for SIGTSTP (Control-Z)
+* SIGTSTP - Signal handler (Control-Z)
 * Toggles allowbg bool and prints message to stdout.
 * Use "kill -SIGTSTP $$" at prompt to test (Using Control-Z
 * will kill the smallsh process as well).
@@ -68,27 +76,25 @@ int main(int argc, char *argv[])
   memset(cwd, '\0', MAX_LINE_LENGTH * sizeof(char));
 
 
-  // Initialize sigaction structs
-  struct sigaction SIGTSTP_action = {0}, ignore_action = {0};
 
-  // Fill out the SIGINT_action struct
-  // Register handle_SIGINT as the signal handler
+  //-------------------------------------------
+  //    SIGNAL handlers setup
+  //-------------------------------------------
+
+  // Initialize sigaction structs
+  struct sigaction SIGTSTP_action = {0}, SIGINT_action = {0};
+
+  
+  // SIGTSTP_action
   SIGTSTP_action.sa_handler = handle_SIGTSTP;
-  // Block all catchable signals while handle_SIGINT is running
   sigfillset(&SIGTSTP_action.sa_mask);
-  // No flags set
   SIGTSTP_action.sa_flags = 0;
   sigaction(SIGTSTP, &SIGTSTP_action, NULL);
 
 
-  // The ignore_action struct as SIG_IGN as its signal handler
-  ignore_action.sa_handler = SIG_IGN;
-
-  // Register the ignore_action as the handler for SIGTERM, SIGHUP, SIGQUIT.
-  // So all three of these signals will be ignored.
-  sigaction(SIGTERM, &ignore_action, NULL);
-  sigaction(SIGHUP, &ignore_action, NULL);
-  sigaction(SIGQUIT, &ignore_action, NULL);
+  // SIGINT_action (Ignore by default)
+  SIGINT_action.sa_handler = SIG_IGN;
+  sigaction(SIGINT, &SIGINT_action, NULL);
 
 
   // PARENT PID - as int and string
@@ -98,15 +104,11 @@ int main(int argc, char *argv[])
   setenv("PID", pidstr, 1);
 
 
-  // // DEBUG
-  // printf("Ennironment Variables:\n");
-  // printf("  PID: %s\n", getenv("PID"));
-  // printf("  HOME: %s\n", getenv("HOME"));
-
-
   // PIDS - to store all child process ids
-  // Pids * fgpids = createPids();
+  Pids * fgpids = createPids();
   Pids * bgpids = createPids();
+  bgpids->isFg = false;
+
 
   int childStatus = 0;
   pid_t spawnPid;
@@ -116,6 +118,7 @@ int main(int argc, char *argv[])
   {
     // CHECK for background processes (iterate over list)
     bgpids->check(bgpids);
+    fgpids->check(fgpids);
 
 
     // PROMPT
@@ -164,6 +167,7 @@ int main(int argc, char *argv[])
 
         // Terminate all child processes/jobs before parent
         bgpids->kill(bgpids);
+        fgpids->kill(fgpids);
 
       } 
 
@@ -173,22 +177,13 @@ int main(int argc, char *argv[])
       // If no given directory, change to HOME directory.
       //-------------------------------------------------
       else if(strcmp(c->name, "cd") == 0) {
-        
-        // DEBUG: Print CWD
-        // getcwd(cwd, MAX_LINE_LENGTH);
-        // printf("CWD: %s\n", cwd);
-
 
         if(c->numargs == 1) {
           chdir(getenv("HOME"));
         } else {
           chdir(c->args[1]);
         }
-
-        // DEBUG: Print CWD
-        // getcwd(cwd, MAX_LINE_LENGTH);
-        // printf("CWD: %s\n", cwd);
-
+        
       }
 
       //-------------------------------------------------
@@ -257,9 +252,6 @@ int main(int argc, char *argv[])
                     exit(1);
                   }
 
-                  // printf("sourceFD == %d\n", c->fdin);  // DEBUG
-
-
                   // Redirect stdin to source file
                   result = dup2(c->fdin, STDIN_FILENO);
                   if (result == -1) { 
@@ -267,6 +259,7 @@ int main(int argc, char *argv[])
                     exit(2); 
                   }
                 }
+
 
                 //-------------------------------------------
                 //    OUTPUT Stream
@@ -280,9 +273,6 @@ int main(int argc, char *argv[])
                     exit(1);
                   }
 
-                  // printf("targetFD == %d\n", c->fdout);  // DEBUG
-
-
                   // Redirect stdout to target file
                   result = dup2(c->fdout, STDOUT_FILENO);
                   if (result == -1) { 
@@ -291,12 +281,28 @@ int main(int argc, char *argv[])
                   }
                 }
 
+
+                //-------------------------------------------
+                //    SIGNALS
+                //-------------------------------------------
+
+                // CHILD ignores SIGTSTP signal
+                sigaction(SIGTSTP, &SIGINT_action, NULL);
+
+
+                // CHILD ignores SIGINT signal if BACKGROUND process
+                if(!c->isBg || !allowbg) {
+                  SIGINT_action.sa_handler = SIG_DFL;
+                }
+                sigaction(SIGINT, &SIGINT_action, NULL);
+
+
                 //-------------------------------------------
                 //    EXECUTE - Replace current program with provided one
                 //-------------------------------------------
                 execvp(c->name, c->args);
 
-                
+                printf("returned because of interrupt");
                 perror("execvp");  // Only returns to this code if there is an error
                 _exit(2);           // Exit Child process (i.e. - don't continue through rest of code)
                 break;
@@ -307,20 +313,26 @@ int main(int argc, char *argv[])
           //    PARENT Process
           //-------------------------------------------------
           default:
-                // pid_t childPid = waitpid(spawnPid, &childStatus, c->isBg ? WNOHANG : 0);  // Wait on child to finish
 
                 // BACKGROUND Process
                 if(c->isBg && allowbg) {
                   printf("background pid is %d\n", spawnPid);
                   fflush(stdout);
                   bgpids->add(bgpids, spawnPid);
-                  // bgpids->print(bgpids);  // DEBUG
                 } 
+
                 
                 // FOREGROUND Process
                 else {
                   spawnPid = waitpid(spawnPid, &childStatus, 0);  // Wait on child to finish
+                  // fgpids->add(fgpids, spawnPid);
+
+                  if(!WIFEXITED(childStatus)){
+                    printf("  terminated by signal %d\n", WTERMSIG(childStatus));
+                    fflush(stdout);
+                  }
                 };
+
                 break;
         }
       }
@@ -329,8 +341,8 @@ int main(int argc, char *argv[])
     }
   } while (strcmp(input, "exit") != 0);
 
-  // fgpids->free(fgpids);
   bgpids->free(bgpids);
+  fgpids->free(fgpids);
 
   return EXIT_SUCCESS;
 }
