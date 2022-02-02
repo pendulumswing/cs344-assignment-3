@@ -43,7 +43,7 @@ run: all
 
 .PHONY: clean
 clean:
-	rm -rf $(BUILDDIR) $(exe_file) *.dSYM brownja4.*
+	rm -rf $(BUILDDIR) $(exe_file) *.dSYM brownja4.* junk junk2
 
 -include $(DEP)
 
