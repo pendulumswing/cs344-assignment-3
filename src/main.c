@@ -82,7 +82,7 @@ int main(int argc, char *argv[])
   //-------------------------------------------
 
   // Initialize sigaction structs
-  struct sigaction SIGTSTP_action = {0}, SIGINT_action = {0};
+  struct sigaction SIGTSTP_action = {{0}}, SIGINT_action = {{0}};
 
   
   // SIGTSTP_action
