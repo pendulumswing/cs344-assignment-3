@@ -58,6 +58,7 @@ typedef struct command {
 * STRUCT PIDS - to hold array of Pids and functions to handle array
 */
 typedef struct pids {
+  bool isFg;
   int numpids;
   int pids[MAX_PIDS];
 
@@ -297,15 +298,26 @@ void parseCommandStreams(Command * c)
 void trimCommandArgs(Command * c)
 {
   bool flag = false;
+
+  // REMOVE last arg if "&"
+  if(strcmp(c->args[c->numargs - 1], "&") == 0)
+  {
+    free(c->args[c->numargs - 1]);
+    c->args[c->numargs - 1] = NULL;
+    c->numargs--;
+  }
+
+  // REMOVE Args after "<" or ">"
   int newnumargs = c->numargs;    // Track new number of args
 
   for (int i = 0; i < c->numargs; i++)
   {
 
     // Set for first special operator found
-    if( strcmp(c->args[i], "<") == 0 || 
-        strcmp(c->args[i], ">") == 0 ||
-        strcmp(c->args[i], "&") == 0 )
+    if( strcmp(c->args[i], "<") == 0
+        || strcmp(c->args[i], ">") == 0
+        // || strcmp(c->args[i], "&") == 0 
+      )
     {
       flag = true;
     }
@@ -374,6 +386,7 @@ void printCommand(Command * c)
 */
 void initPids(Pids * p)
 {
+  p->isFg = true;
   p->numpids = 0;
   memset(p->pids, 0, MAX_PIDS);
 
@@ -447,13 +460,14 @@ void printPids(Pids * p)
 */
 void checkPids(Pids * p)
 {
+  int isFg = p->isFg;
   int status = -1;
   int childStatus;
   for (int i = 0; i < p->numpids; i++)
   {
     status = waitpid(p->pids[i], &childStatus, WNOHANG);  // Immediately checks on child status
     if(status != 0) {
-      printf("background pid %d is done: ", p->pids[i]);
+      printf("%s pid %d is done: ", isFg ? "foreground" : "background", p->pids[i]);
       if(WIFEXITED(childStatus)){
           printf("exit status %d\n", WEXITSTATUS(childStatus));
           fflush(stdout);
