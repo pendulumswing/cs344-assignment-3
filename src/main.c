@@ -304,7 +304,7 @@ int main(int argc, char *argv[])
 
                 printf("returned because of interrupt");
                 perror("execvp");  // Only returns to this code if there is an error
-                _exit(2);           // Exit Child process (i.e. - don't continue through rest of code)
+                exit(2);           // Exit Child process (i.e. - don't continue through rest of code)
                 break;
               }
           
