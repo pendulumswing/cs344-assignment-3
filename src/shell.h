@@ -373,8 +373,6 @@ void printCommand(Command * c)
   printf("  hasInput: %d\n", c->hasInput);
   printf("  hasOutput: %d\n", c->hasOutput);
   printf("  isBG: %d\n", c->isBg);
-
-
   fflush(stdout);
 }
 
@@ -450,6 +448,7 @@ void printPids(Pids * p)
     printf("%d\n", p->pids[i]);
   }
   printf("\n");
+  fflush(stdout);
 }
 
 
@@ -468,6 +467,8 @@ void checkPids(Pids * p)
     status = waitpid(p->pids[i], &childStatus, WNOHANG);  // Immediately checks on child status
     if(status != 0) {
       printf("%s pid %d is done: ", isFg ? "foreground" : "background", p->pids[i]);
+      fflush(stdout);
+
       if(WIFEXITED(childStatus)){
           printf("exit status %d\n", WEXITSTATUS(childStatus));
           fflush(stdout);
@@ -475,6 +476,7 @@ void checkPids(Pids * p)
           printf("terminated by signal %d\n", WTERMSIG(childStatus));
           fflush(stdout);
         }
+
       p->remove(p, p->pids[i]);
       // p->print(p);  // DEBUG
     }
@@ -490,7 +492,6 @@ void killPids(Pids * p)
 {
   for (int i = p->numpids - 1; i >= 0; i--)
   {
-    // TODO: Check status to see if running first (waitpid())
 
     // SOURCE: https://bit.ly/3gcmbQY, Date: 1/30/22, Adopted
     int ret = kill(p->pids[i], SIGKILL);
@@ -498,7 +499,8 @@ void killPids(Pids * p)
         perror("kill");
         exit(EXIT_FAILURE);
     }
-    printf("Killed child process: %d\n", p->pids[i]);  // DEBUG
+    // printf("Killed child process: %d\n", p->pids[i]);  // DEBUG
+    // fflush(stdout);
     removePid(p, p->pids[i]);
     // p->print(p);  // DEBUG
   }

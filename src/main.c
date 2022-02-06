@@ -303,6 +303,7 @@ int main(int argc, char *argv[])
                 execvp(c->name, c->args);
 
                 printf("returned because of interrupt");
+                fflush(stdout);
                 perror("execvp");  // Only returns to this code if there is an error
                 exit(2);           // Exit Child process (i.e. - don't continue through rest of code)
                 break;
