@@ -1,4 +1,4 @@
-Assignment 3: smallsh
+smallsh
 
 This program will:
 
@@ -13,9 +13,10 @@ This program will:
 
 
 Compile:
-Two methods to compile source code are provided below. 
+Note: Compile and execute from within the `src/` directory.
+Two methods to compile source code are provided below.
 The executable will be named `smallsh` and can be 
-exectuted with `./smallsh`. 
+executed with `./smallsh`.
 
 Compile from the command line with:
 gcc --std=gnu99 -g -Wall -o smallsh main.c

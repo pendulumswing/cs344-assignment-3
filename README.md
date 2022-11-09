@@ -11,7 +11,10 @@ This program will:
 7. Support running commands in foreground and background processes
 8. Implement custom handlers for 2 signals, SIGINT and SIGTSTP
 
+
 ### Compile:
+Compile and execute from within the `src/` directory.
+
 Two methods to compile source code are provided below. The executable will be named `smallsh` and can be exectuted with `./smallsh`. Compile from the command line with:
 ```
 gcc --std=gnu99 -g -Wall -o smallsh main.c
